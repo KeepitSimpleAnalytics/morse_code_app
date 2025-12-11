@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  morse-trainer:
+    build: .
+    container_name: morse-code-trainer
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+    labels:
+      - "description=Morse Code Training Application"

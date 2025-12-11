@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Code Trainer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📻 Morse Code Trainer</h1>
+            <p class="subtitle">Learn CW with progressive training methods</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Practice Mode Selection -->
+            <section class="card">
+                <h2>Practice Mode</h2>
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="koch">Koch Method</button>
+                    <button class="mode-btn" data-mode="letters">Random Letters</button>
+                    <button class="mode-btn" data-mode="words">Common Words</button>
+                    <button class="mode-btn" data-mode="callsigns">Callsigns</button>
+                    <button class="mode-btn" data-mode="qcodes">Q-Codes</button>
+                    <button class="mode-btn" data-mode="custom">Custom Text</button>
+                </div>
+            </section>
+
+            <!-- Speed Controls -->
+            <section class="card">
+                <h2>Speed Settings</h2>
+                <div class="speed-controls">
+                    <div class="control-group">
+                        <label for="charSpeed">Character Speed (WPM)</label>
+                        <div class="slider-container">
+                            <input type="range" id="charSpeed" min="5" max="40" value="20">
+                            <span id="charSpeedValue">20</span> WPM
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="effectiveSpeed">Effective Speed (WPM)</label>
+                        <div class="slider-container">
+                            <input type="range" id="effectiveSpeed" min="5" max="40" value="15">
+                            <span id="effectiveSpeedValue">15</span> WPM
+                        </div>
+                        <small>Uses Farnsworth timing for slower effective speed</small>
+                    </div>
+                    <p id="speedStatus" class="speed-status"></p>
+                    <div class="control-group">
+                        <label for="frequency">Tone Frequency (Hz)</label>
+                        <div class="slider-container">
+                            <input type="range" id="frequency" min="400" max="1000" value="600" step="50">
+                            <span id="frequencyValue">600</span> Hz
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Koch Method Progress -->
+            <section class="card koch-section">
+                <h2>Koch Method Progress</h2>
+                <div class="koch-info">
+                    <p>Current Level: <strong id="kochLevel">1</strong></p>
+                    <p>Characters: <strong id="kochChars">K M</strong></p>
+                    <p>Accuracy: <strong id="accuracy">--</strong></p>
+                    <button id="nextLevel" disabled>Advance to Next Level (90%+ required)</button>
+                </div>
+            </section>
+
+            <!-- Custom Text Input -->
+            <section class="card custom-section" style="display: none;">
+                <h2>Custom Text</h2>
+                <textarea id="customText" placeholder="Enter your custom text here..."></textarea>
+            </section>
+
+            <!-- Play Controls -->
+            <section class="card">
+                <h2>Practice Session</h2>
+                <div class="play-controls">
+                    <button id="playBtn" class="btn-primary">▶ Play New Message</button>
+                    <button id="repeatBtn" class="btn-secondary" disabled>🔄 Repeat</button>
+                    <button id="stopBtn" class="btn-secondary" disabled>⏹ Stop</button>
+                </div>
+
+                <div class="visual-feedback">
+                    <div id="morseDisplay" class="morse-display"></div>
+                </div>
+
+                <div class="message-info">
+                    <p>Message length: <strong id="messageLength">0</strong> characters</p>
+                </div>
+            </section>
+
+            <!-- Answer Input -->
+            <section class="card">
+                <h2>Your Answer</h2>
+                <input type="text" id="answerInput" placeholder="Type what you heard..." disabled>
+                <button id="checkBtn" class="btn-primary" disabled>Check Answer</button>
+                <button id="revealBtn" class="btn-secondary" disabled>Reveal Answer</button>
+
+                <div id="feedback" class="feedback"></div>
+                <div id="actualMessage" class="actual-message"></div>
+            </section>
+
+            <!-- Statistics -->
+            <section class="card">
+                <h2>Session Statistics</h2>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Correct:</span>
+                        <span id="correctCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Incorrect:</span>
+                        <span id="incorrectCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Success Rate:</span>
+                        <span id="successRate">0%</span>
+                    </div>
+                    <button id="resetStats" class="btn-secondary">Reset Statistics</button>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>💡 Tip: Don't count dots and dashes - listen for the rhythm and pattern of each character!</p>
+        </footer>
+    </div>
+
+    <script src="morse.js"></script>
+</body>
+</html>
