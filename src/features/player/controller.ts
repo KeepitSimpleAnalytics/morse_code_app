@@ -55,7 +55,13 @@ function playbackPlan(fromToken: number | null): { tokens: Token[]; startIndex: 
 let pausedAtToken: number | null = null;
 let currentTokens: Token[] = [];
 
-function startPlayback(fromToken: number | null, leadInMs?: number): Promise<void> {
+interface StartOptions {
+  readonly leadInMs?: number;
+  /** Where each loop repetition starts, if not where this playback starts. */
+  readonly loopFrom?: number;
+}
+
+function startPlayback(fromToken: number | null, opts: StartOptions = {}): Promise<void> {
   return (async () => {
     const plan = playbackPlan(fromToken);
     if (!plan) {
@@ -65,7 +71,11 @@ function startPlayback(fromToken: number | null, leadInMs?: number): Promise<voi
     const sched = await getScheduler();
     applySound();
     const { tokens, startIndex } = plan;
+    const loopFrom = opts.loopFrom ?? startIndex;
+    const { leadInMs } = opts;
     currentTokens = tokens;
+    playingFrom = startIndex;
+    loopOrigin = loopFrom;
     const elements: TimelineElement[] = buildTimeline(
       tokens.slice(startIndex),
       timingNow(),
@@ -83,7 +93,7 @@ function startPlayback(fromToken: number | null, leadInMs?: number): Promise<voi
       onDone: () => {
         if (state().loop && state().status === "playing") {
           // Loop with a word gap between repetitions.
-          void startPlayback(startIndex, timingNow().wordGap);
+          void startPlayback(loopFrom, { leadInMs: timingNow().wordGap });
         } else {
           state().set({ status: "idle", active: null });
         }
@@ -94,18 +104,50 @@ function startPlayback(fromToken: number | null, leadInMs?: number): Promise<voi
   });
 }
 
+/* ---------------------------------------------------------------------------
+ * Live speed change: a speed edit while playing restarts from the current
+ * character at the new speed, once the slider settles.
+ * ------------------------------------------------------------------------- */
+
+export const SPEED_RESTART_DEBOUNCE_MS = 250;
+
+let playingFrom = 0;
+let loopOrigin = 0;
+let speedRestart: ReturnType<typeof setTimeout> | null = null;
+
+function cancelSpeedRestart(): void {
+  if (speedRestart !== null) clearTimeout(speedRestart);
+  speedRestart = null;
+}
+
+usePlayerStore.subscribe((s, prev) => {
+  if (s.speeds === prev.speeds || s.status !== "playing") return;
+  cancelSpeedRestart();
+  speedRestart = setTimeout(() => {
+    speedRestart = null;
+    if (state().status !== "playing") return;
+    // Same clean-stop path as Pause/Resume: the current character starts over.
+    void startPlayback(pausedAtToken ?? playingFrom, {
+      leadInMs: timingNow().charGap,
+      loopFrom: loopOrigin,
+    });
+  }, SPEED_RESTART_DEBOUNCE_MS);
+});
+
 export function play(): Promise<void> {
-  const resumeFrom = state().status === "paused" ? pausedAtToken : null;
-  return startPlayback(resumeFrom);
+  if (state().status === "paused") return startPlayback(pausedAtToken, { loopFrom: loopOrigin });
+  return startPlayback(null);
 }
 
 export function pause(): void {
   if (state().status !== "playing" || !scheduler) return;
+  cancelSpeedRestart();
   scheduler.stop();
   state().set({ status: "paused" });
 }
 
 export function stop(): void {
+  cancelSpeedRestart();
   scheduler?.stop();
   pausedAtToken = null;
   live.reset();
