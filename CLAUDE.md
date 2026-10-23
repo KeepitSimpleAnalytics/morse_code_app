@@ -1,6 +1,6 @@
 # Morse Trainer v2
 
-The full specification is in `SPEC.md`. It is the source of truth: read it before doing any work, and build in the phase order in §15.
+The full specification is in `SPEC.md`. It is the source of truth: read it before doing any work, and build in the phase order in §15. Current status, open questions for the owner and handoff notes are in `docs/progress.md`; keep it updated at the end of each phase.
 
 ## Context
 
