@@ -5,8 +5,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "../../src/App";
 import { useNavStore } from "../../src/state/nav";
 import { bindThemeToDocument, useThemeStore } from "../../src/state/theme";
+import { openTestProfile } from "./harness";
 
-beforeEach(() => {
+beforeEach(async () => {
+  await openTestProfile();
   useNavStore.setState({ screen: "koch" });
   useThemeStore.setState({ preference: "system", systemPrefersDark: false });
 });

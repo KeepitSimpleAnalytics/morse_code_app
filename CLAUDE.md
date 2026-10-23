@@ -23,6 +23,7 @@ pnpm is pinned to 10.x through `packageManager` and run via corepack. pnpm 12 sh
 
 - `pnpm i`: install (CI uses `--frozen-lockfile`)
 - `pnpm tauri dev`: run the desktop app (Vite on :1420)
+- `pnpm dev:web`: browser-only session on MemoryStore (red banner, nothing saved). `?demo=<screen id>` opens a throwaway profile on that screen, for screenshots
 - `pnpm test`: Vitest, specs in `tests/`. Node environment by default; UI specs opt in with `// @vitest-environment jsdom`
 - `pnpm lint`: ESLint, zero warnings allowed. It also enforces the `src/core` purity rule
 - `pnpm typecheck`: tsc for the app/tests and for the Node config files

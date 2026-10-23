@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { layoutPattern } from "./morse-layout";
 import styles from "./MorsePills.module.css";
+import { prefersReducedMotion } from "../app/motion";
 
 interface MorsePillsProps {
   /** Dots and dashes, letters separated by spaces. Decorative only. */
@@ -31,7 +32,7 @@ export function MorsePills({
   useEffect(() => {
     const root = rootRef.current;
     if (!root || !unitMs) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReducedMotion()) return;
 
     const cycleMs = unitMs * cycleUnits;
     const lit = `0 0 10px ${getComputedStyle(root).getPropertyValue("--color-signal-glow").trim()}`;

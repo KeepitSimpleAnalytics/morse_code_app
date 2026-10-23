@@ -17,7 +17,7 @@ body,
 }
 
 html {
-  /* Font size setting (§10.2, 100–200%) will scale this root value. */
+  /* Settings → Display → Font size (100–200%) scales this root value (app/bindings.ts). */
   font-size: 100%;
   -webkit-text-size-adjust: 100%;
 }
@@ -101,6 +101,7 @@ kbd {
   background: transparent;
 }
 
+/* The OS setting, or Settings → Display → Reduce motion (§10.6). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -109,4 +110,12 @@ kbd {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+:root[data-reduce-motion="true"] *,
+:root[data-reduce-motion="true"] *::before,
+:root[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

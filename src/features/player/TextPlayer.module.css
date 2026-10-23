@@ -363,3 +363,9 @@
     flex-basis: 100%;
   }
 }
+
+.headRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

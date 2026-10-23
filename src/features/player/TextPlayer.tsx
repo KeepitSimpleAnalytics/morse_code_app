@@ -32,6 +32,7 @@ import * as player from "./controller";
 import { Editor } from "./Editor";
 import { saveWav } from "./export";
 import { ReverseDecode } from "./ReverseDecode";
+import { SnippetsButton } from "./Snippets";
 import { PLAYER_MAX_CHARS, usePlayerStore } from "./store";
 import { tokenIndexAtOffset, tokenIndexBySourceStart } from "./text-model";
 import styles from "./TextPlayer.module.css";
@@ -154,18 +155,29 @@ export function TextPlayer() {
           <p className={styles.eyebrow}>Tools</p>
           <h1 className={styles.title}>Text Player</h1>
         </div>
-        <Segmented<Mode>
-          label="Direction"
-          value={mode}
-          onChange={(m) => {
-            if (m === "decode") player.stop();
-            setMode(m);
-          }}
-          options={[
-            { value: "encode", label: "Text → Morse" },
-            { value: "decode", label: "Morse → Text" },
-          ]}
-        />
+        <div className={styles.headRight}>
+          {mode === "encode" && (
+            <SnippetsButton
+              text={s.text}
+              onLoad={(body) => {
+                player.stop();
+                setText(body.slice(0, PLAYER_MAX_CHARS));
+              }}
+            />
+          )}
+          <Segmented<Mode>
+            label="Direction"
+            value={mode}
+            onChange={(m) => {
+              if (m === "decode") player.stop();
+              setMode(m);
+            }}
+            options={[
+              { value: "encode", label: "Text → Morse" },
+              { value: "decode", label: "Morse → Text" },
+            ]}
+          />
+        </div>
       </header>
 
       {mode === "decode" ? (

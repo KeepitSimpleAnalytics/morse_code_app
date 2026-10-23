@@ -4,6 +4,8 @@ import { DEFAULT_RISE_MS } from "../../core/envelope";
 import { DEFAULT_SPEEDS, type Speeds } from "../../core/speed";
 
 export const PLAYER_MAX_CHARS = 20000;
+export const PLAYER_SAMPLE_TEXT =
+  "CQ CQ DE W1AW W1AW <AR>\nThe quick brown fox jumps over the lazy dog 73";
 
 export interface SourceRange {
   readonly start: number;
@@ -15,7 +17,8 @@ export type PlayerStatus = "idle" | "playing" | "paused" | "live";
 /**
  * Text Player state. Player settings (speed, tone, volume) are separate from the
  * training settings (SPEC §7.8), so playing here never changes lesson speeds.
- * Persisted per profile from phase 3; until then they last for the session.
+ * The text and settings are saved per profile as `player.*` settings
+ * (app/bindings.ts).
  */
 export interface PlayerState {
   text: string;
