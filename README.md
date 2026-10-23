@@ -10,7 +10,10 @@ Windows 10/11 is the primary platform. macOS is built in CI but untested.
 
 ## Status
 
-Phase 0 (scaffold) is done: the app shell, theme tokens, tooling and CI. The modes arrive in the phases listed in SPEC §15.
+- **Phase 0 (scaffold):** done. App shell, theme tokens, tooling and CI.
+- **Phase 1 (core):** done. `src/core/` has the alphabet, tokenizer, timing, timeline, seeded RNG, per-character scoring, adaptive weighting, Koch orders (verified against their sources; see `src/data/README.md`) and the group generators.
+
+The modes arrive in the phases listed in SPEC §15.
 
 ## Development
 

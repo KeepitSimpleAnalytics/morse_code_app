@@ -1,0 +1,23 @@
+{
+  "id": "koch-orders",
+  "name": "Koch character orders",
+  "source": "See src/data/README.md for per-order sources and verification",
+  "license": "Factual sequences (not copyrightable); sources credited in README.md",
+  "items": [
+    {
+      "id": "lcwo",
+      "name": "LCWO",
+      "chars": ["K", "M", "U", "R", "E", "S", "N", "A", "P", "T", "L", "W", "I", ".", "J", "Z", "=", "F", "O", "Y", ",", "V", "G", "5", "/", "Q", "9", "2", "H", "3", "8", "B", "?", "4", "7", "C", "1", "D", "6", "0", "X"]
+    },
+    {
+      "id": "g4fon",
+      "name": "G4FON",
+      "chars": ["K", "M", "R", "S", "U", "A", "P", "T", "L", "O", "W", "I", ".", "N", "J", "E", "F", "0", "Y", ",", "V", "G", "5", "/", "Q", "9", "Z", "H", "3", "8", "B", "?", "4", "2", "7", "C", "1", "D", "6", "X"]
+    },
+    {
+      "id": "classic-v1",
+      "name": "Classic (v1)",
+      "chars": ["K", "M", "R", "S", "U", "A", "P", "T", "L", "O", "W", "I", "N", "J", "E", "F", "0", "Y", "V", "G", "5", "Q", "9", "Z", "H", "3", "8", "B", "?", "4", "2", "7", "C", "1", "D", "6", "X"]
+    }
+  ]
+}

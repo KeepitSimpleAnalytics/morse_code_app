@@ -27,6 +27,11 @@ export default defineConfig(
     },
     rules: {
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
+      // The stylistic preset asks for `x!` while the strict preset forbids it; keep strict.
+      "@typescript-eslint/non-nullable-type-assertion-style": "off",
+      // Spreading a string iterates code points, which is exactly what the tokenizer
+      // and Morse patterns need.
+      "@typescript-eslint/no-misused-spread": "off",
     },
   },
   {
