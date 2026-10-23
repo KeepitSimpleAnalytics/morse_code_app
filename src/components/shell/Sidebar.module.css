@@ -4,15 +4,20 @@
   gap: var(--space-5);
   height: 100%;
   padding: var(--space-4) var(--space-3) var(--space-3);
-  background: var(--color-sidebar);
-  border-right: 1px solid var(--color-border);
+  /* Focus ring and selection colours follow the sidebar's own palette. */
+  --color-focus: var(--sidebar-signal);
+  color: var(--sidebar-text);
+  background:
+    radial-gradient(120% 40% at 0% 0%, rgba(255, 176, 106, 0.07), transparent 70%),
+    var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
 
 .sidebar:hover {
-  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-color: var(--sidebar-border) transparent;
 }
 
 /* Brand */
@@ -32,13 +37,14 @@
   width: 44px;
   height: 44px;
   border-radius: 13px;
-  color: var(--color-signal);
+  color: var(--sidebar-signal);
   background:
-    radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.08), transparent 60%),
-    linear-gradient(150deg, #2a2340, #17131f);
+    radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.1), transparent 60%),
+    linear-gradient(150deg, #332a4c, #15111d);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-    var(--shadow-md);
+    inset 0 0 0 1px rgba(255, 176, 106, 0.2),
+    0 6px 16px -6px rgba(0, 0, 0, 0.55),
+    0 0 22px -8px var(--sidebar-signal-glow);
 }
 
 .brandText {
@@ -60,7 +66,7 @@
 
 .brandTag {
   font-size: var(--text-xs);
-  color: var(--color-text-subtle);
+  color: var(--sidebar-subtle);
   letter-spacing: 0.01em;
 }
 
@@ -78,7 +84,7 @@
   font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-text-subtle);
+  color: var(--sidebar-subtle);
 }
 
 .list {
@@ -92,7 +98,7 @@
 
 .footer {
   padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--sidebar-border);
 }
 
 /* Items */
@@ -106,7 +112,7 @@
   border: 0;
   border-radius: var(--radius-md);
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--sidebar-muted);
   font-size: var(--text-md);
   font-weight: 500;
   text-align: left;
@@ -124,20 +130,20 @@
   width: 4px;
   height: 0;
   border-radius: var(--radius-pill);
-  background: var(--color-signal);
-  box-shadow: 0 0 12px var(--color-signal-glow);
+  background: var(--sidebar-signal);
+  box-shadow: 0 0 12px var(--sidebar-signal-glow);
   transform: translateY(-50%);
   transition: height var(--dur-med) var(--ease-out);
 }
 
 .item:hover {
-  background: var(--color-sidebar-hover);
-  color: var(--color-text);
+  background: var(--sidebar-hover);
+  color: var(--sidebar-text);
 }
 
 .item[aria-current="page"] {
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
   font-weight: 600;
 }
 
@@ -162,7 +168,7 @@
   flex: none;
   padding: 1px 6px;
   border-radius: 5px;
-  color: var(--color-text-subtle);
+  color: var(--sidebar-subtle);
   background: transparent;
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-out);
@@ -171,9 +177,9 @@
 .item:hover .kbd,
 .item:focus-visible .kbd {
   opacity: 1;
-  background: var(--color-surface);
+  background: var(--sidebar-kbd-bg);
 }
 
 .item[aria-current="page"] .kbd {
-  color: var(--color-accent-text);
+  color: var(--sidebar-active-text);
 }

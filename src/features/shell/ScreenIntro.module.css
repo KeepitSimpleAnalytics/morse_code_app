@@ -24,19 +24,30 @@
   padding: var(--space-12) var(--space-10) var(--space-10);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  background: var(--color-surface);
+  background: var(--hero-bg);
   box-shadow: var(--shadow-md);
+}
+
+/* A faint dot grid, like graph paper in a logbook, fading out to the left. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(var(--hero-grid) 1.2px, transparent 1.4px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(105deg, transparent 30%, #000 85%);
+  pointer-events: none;
 }
 
 .heroGlow {
   position: absolute;
-  inset: -40% -20% auto auto;
-  width: 520px;
-  height: 520px;
+  inset: -45% -18% auto auto;
+  width: 560px;
+  height: 560px;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(closest-side, var(--color-signal-glow), transparent 70%);
-  opacity: 0.45;
+  background: radial-gradient(closest-side, var(--hero-glow), transparent 72%);
   pointer-events: none;
 }
 
@@ -47,9 +58,11 @@
   height: 52px;
   margin-bottom: var(--space-6);
   border-radius: 16px;
-  color: var(--color-accent-text);
-  background: var(--color-accent-soft);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--hero-icon-fg);
+  background: var(--hero-icon-bg);
+  box-shadow:
+    inset 0 0 0 1px var(--hero-icon-ring),
+    var(--hero-icon-shadow);
 }
 
 .eyebrow {
@@ -132,6 +145,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   font-weight: 500;
   line-height: 1.45;
   transition:
@@ -158,7 +172,7 @@
   padding: var(--space-5) var(--space-6);
   border-left: 3px solid var(--color-signal);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  background: var(--color-accent-softer);
+  background: var(--tip-bg);
   color: var(--color-text-muted);
 }
 
