@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- "CW" in Morse: C is dah-dit-dah-dit, W is dit-dah-dah. Amber "valve glow" on midnight, matching the brand mark. -->
+  <defs>
+    <linearGradient id="bg" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#2d2545"/>
+      <stop offset="1" stop-color="#14111d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffb06a" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#ffb06a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd09a"/>
+      <stop offset="1" stop-color="#ff9a52"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="32" y="32" width="960" height="960" rx="216" fill="url(#bg)"/>
+  <rect x="32" y="32" width="960" height="960" rx="216" fill="url(#sheen)"/>
+  <ellipse cx="512" cy="512" rx="420" ry="300" fill="url(#glow)"/>
+
+  <g fill="url(#amber)">
+    <!-- C: dah dit dah dit (dah 208, dit 80, gap 52) → width 732, centred at 512 -->
+    <rect x="146" y="372" width="208" height="80" rx="40"/>
+    <rect x="406" y="372" width="80"  height="80" rx="40"/>
+    <rect x="538" y="372" width="208" height="80" rx="40"/>
+    <rect x="798" y="372" width="80"  height="80" rx="40"/>
+    <!-- W: dit dah dah → width 600, centred at 512 -->
+    <rect x="212" y="572" width="80"  height="80" rx="40"/>
+    <rect x="344" y="572" width="208" height="80" rx="40"/>
+    <rect x="604" y="572" width="208" height="80" rx="40"/>
+  </g>
+</svg>

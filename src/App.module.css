@@ -1,0 +1,27 @@
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  height: 100%;
+}
+
+.main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  background:
+    radial-gradient(900px 520px at 100% -10%, var(--color-bg-glow), transparent 70%),
+    var(--color-bg);
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-10) var(--space-8) var(--space-16);
+}
+
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}

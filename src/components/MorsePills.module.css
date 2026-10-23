@@ -1,0 +1,65 @@
+.pills {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--letter-gap);
+}
+
+.md {
+  --pill-h: 6px;
+  --dit-w: 6px;
+  --dah-w: 18px;
+  --element-gap: 4px;
+  --letter-gap: 10px;
+}
+
+.sm {
+  --pill-h: 4px;
+  --dit-w: 4px;
+  --dah-w: 12px;
+  --element-gap: 3px;
+  --letter-gap: 7px;
+}
+
+.xs {
+  --pill-h: 4px;
+  --dit-w: 4px;
+  --dah-w: 10px;
+  --element-gap: 2.5px;
+  --letter-gap: 5px;
+}
+
+.stacked {
+  flex-direction: column;
+}
+
+.letter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--element-gap);
+}
+
+.pill {
+  display: block;
+  height: var(--pill-h);
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+
+.dit {
+  width: var(--dit-w);
+}
+
+.dah {
+  width: var(--dah-w);
+}
+
+/* Keyed pills rest dim; the Web Animations API lights them in Morse timing. */
+.keyed .pill {
+  opacity: 0.32;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keyed .pill {
+    opacity: 0.85;
+  }
+}

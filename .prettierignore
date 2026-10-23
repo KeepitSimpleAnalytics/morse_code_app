@@ -1,0 +1,8 @@
+dist/
+coverage/
+legacy/
+pnpm-lock.yaml
+src-tauri/target/
+src-tauri/gen/
+src-tauri/icons/
+SPEC.md
