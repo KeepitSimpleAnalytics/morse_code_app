@@ -11,6 +11,11 @@ pub fn run() {
         .plugin(tauri_plugin_window_state::Builder::default().build());
 
     builder
+        .plugin(tauri_plugin_fs::init())
+        // Paths chosen in a save/open dialog are added to the fs scope by the dialog
+        // plugin itself (plugins/dialog/src/commands.rs), so the capability only
+        // pre-authorizes $APPDATA.
+        .plugin(tauri_plugin_dialog::init())
         .run(tauri::generate_context!())
         .expect("error while running Morse Trainer");
 }

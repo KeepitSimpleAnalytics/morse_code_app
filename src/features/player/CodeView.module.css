@@ -1,0 +1,57 @@
+.code {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  line-height: 2.1;
+  letter-spacing: 0.08em;
+  word-spacing: 0;
+  color: var(--color-text-muted);
+  scrollbar-gutter: stable;
+}
+
+.phonetic {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+}
+
+.char,
+.gap {
+  display: inline-block;
+  margin-right: 0.85em;
+  padding: 0 3px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.char:hover,
+.gap:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.gap {
+  margin-right: 0.85em;
+  color: var(--color-text-subtle);
+}
+
+.active {
+  background: color-mix(in srgb, var(--color-signal) 22%, transparent);
+  color: var(--color-accent-text);
+  box-shadow: 0 0 14px var(--color-signal-glow);
+}
+
+.start {
+  box-shadow: inset 2px 0 0 var(--color-signal);
+}
+
+.empty {
+  font-family: var(--font-ui);
+  letter-spacing: 0;
+  color: var(--color-text-subtle);
+}

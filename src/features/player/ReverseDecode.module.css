@@ -1,0 +1,106 @@
+.decode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  height: 100%;
+  padding: var(--space-5) var(--space-6);
+}
+
+.inputWrap,
+.outputWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.input {
+  flex: 1;
+  min-height: 140px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  letter-spacing: 0.08em;
+  resize: none;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.help {
+  font-size: var(--text-sm);
+  color: var(--color-text-subtle);
+}
+
+.help code,
+.errors code {
+  font-family: var(--font-mono);
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--color-surface-sunken);
+  color: var(--color-text);
+}
+
+.output {
+  flex: 1;
+  min-height: 140px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-variation-settings: "opsz" 72;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.placeholder {
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  color: var(--color-text-subtle);
+}
+
+.errors {
+  margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-8);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.use {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-weight: 550;
+}
+
+.use:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+.use:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

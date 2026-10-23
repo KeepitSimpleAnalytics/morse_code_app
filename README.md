@@ -13,6 +13,8 @@ Windows 10/11 is the primary platform. macOS is built in CI but untested.
 - **Phase 0 (scaffold):** done. App shell, theme tokens, tooling and CI.
 - **Phase 1 (core):** done. `src/core/` has the alphabet, tokenizer, timing, timeline, seeded RNG, per-character scoring, adaptive weighting, Koch orders (verified against their sources; see `src/data/README.md`) and the group generators.
 
+- **Phase 2 (audio and Text Player):** built and tested; manual QA items 4 and 10 still need to be run on Windows. One shared `AudioContext` with a lookahead scheduler and raised-cosine keying, the full Text Player (play/pause/stop, loop, play from cursor, type-to-transmit, prosign palette, three code formats, reverse decode, hide text, copy code, WAV export) and the latency check. Measurements are in `docs/latency.md`.
+
 The modes arrive in the phases listed in SPEC §15.
 
 ## Development

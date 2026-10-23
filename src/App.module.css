@@ -26,3 +26,16 @@
   max-width: var(--content-max);
   margin: 0 auto;
 }
+
+/* Workspace screens (Text Player) fill the area instead of scrolling a column. */
+.workspace {
+  overflow: hidden;
+}
+
+.workspace .content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-8) var(--space-5);
+}

@@ -1,0 +1,78 @@
+.editor {
+  position: relative;
+  height: 100%;
+  min-height: 160px;
+}
+
+/* The textarea and the overlay must lay text out identically. */
+.textarea,
+.overlay {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: var(--space-5) var(--space-6);
+  border: 0;
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  line-height: 1.75;
+  letter-spacing: 0.005em;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  tab-size: 4;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.textarea {
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: transparent;
+  color: var(--color-text);
+  caret-color: var(--color-signal);
+  outline: none;
+  transition: filter var(--dur-med) var(--ease-out);
+}
+
+.textarea::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.overlay {
+  z-index: 2;
+  overflow: hidden;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+
+.active {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-signal) 30%, transparent);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--color-signal) 30%, transparent),
+    0 0 14px var(--color-signal-glow);
+}
+
+.unsupported {
+  pointer-events: auto;
+  cursor: help;
+  text-decoration: underline wavy var(--color-danger);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+/* The play-from point: a small signal flag before the character. */
+.startMark {
+  box-shadow: inset 2px 0 0 var(--color-signal);
+}
+
+.hidden .textarea {
+  filter: blur(7px);
+}
+
+.hidden .overlay {
+  filter: blur(7px);
+}
