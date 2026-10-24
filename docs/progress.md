@@ -14,6 +14,16 @@ SPEC §15 and what is waiting on whom.
 | (extra) Live speed change while playing | Done.                                                                                                 | 09029a4          |
 | 3. Storage, profiles, settings          | Built. Waiting for the user's QA 3 and 7.                                                             | 8ec5d62          |
 | 4. Koch, scoring UI, session flow       | Not started. Starts once Phase 3 is accepted.                                                         | —                |
+| 5. Other copy modes (trimmed)           | Not started.                                                                                          | —                |
+| 6. ICR + adaptive                       | Not started.                                                                                          | —                |
+| 7. Stats dashboard (trimmed)            | Not started.                                                                                          | —                |
+| 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
+| 9. Realism + extras                     | Dropped, see SPEC §15.1.                                                                              | —                |
+| 10. Release                             | Not started. Follows phase 7.                                                                         | —                |
+
+## Scope cut (2026-10-23)
+
+The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in full. Phases 5 and 7 are trimmed, and phases 8 and 9 are dropped. SPEC §15 has the new scope and §15.1 lists everything deferred. Don't build anything on that list unless the owner asks.
 
 ## Open items (waiting on the owner)
 
@@ -21,7 +31,7 @@ SPEC §15 and what is waiting on whom.
    - **Item 3:** set effective speed below character speed, relaunch, and check it is unchanged.
    - **Item 7:** Export, delete the profile, Import, and check everything is restored.
    - **Item 8** (kill the app mid-lesson) can only be done by hand once Phase 4 has lessons. Until then, contract tests in `tests/storage/contract.ts` ("closes abandoned ones as incomplete") cover it.
-2. **Latency retest:** wired headphones on the Realtek analog jack. If it's still over 40 ms, Phase 8 needs the Rust `cpal` sidetone fallback (SPEC §13).
+2. **Latency retest:** wired headphones on the Realtek analog jack. This is now low priority. The 40 ms limit only matters for sending sidetone, and sending practice (phase 8) has been dropped.
 3. **Push and CI:** pushes must go out as the KeepitSimple GitHub account, never robabrown. This PC has no KeepitSimple SSH key yet, so ask the owner how to set one up. CI has never run.
 
 ## Decisions made so far (not yet revisited by the owner)
@@ -31,7 +41,7 @@ SPEC §15 and what is waiting on whom.
 - Added the `tauri-plugin-opener` dependency, for Settings → Data → Open folder.
 - v1 import stores the level on the `classic-v1` Koch order and switches the profile's Koch order to it.
 - "Send snippet to Custom Practice" is deferred to Phase 5.
-- The streak flame and goal ring in the top bar are deferred to Phase 9. The Keys and Realism settings sections wait for Phases 8 and 9.
+- The streak flame and goal ring in the top bar, and the Keys and Realism settings sections, are dropped along with phases 8 and 9.
 
 ## How Phase 3 is put together
 

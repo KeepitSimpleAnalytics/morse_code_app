@@ -745,12 +745,21 @@ Each phase ends with its tests green, the app runnable through `pnpm tauri dev` 
 | **2. Audio + Text Player** | Audio engine with lookahead scheduler, keyed gain, raised cosine. Full Text Player (§7.8) except snippets (which need storage). WAV export. Latency check, with results in `docs/latency.md` (on the Windows target machine). | QA items 4 and 10 pass. |
 | **3. Storage + profiles + settings** | Migrations, SqliteStore, MemoryStore, contract tests, profiles, settings screens, debounced saving, backups, export/import, v1 import, snippets. | QA items 3, 7 and 8 pass. Storage tests pass. |
 | **4. Koch + scoring UI + session flow** | Koch Lessons in full, results diff, char events, `char_stats`, advancement and regression, new-character intro. | QA item 2 passes. A full lesson works end to end. |
-| **5. Other copy modes** | Random Groups, Words (with data lists), Callsigns, Custom Practice. | Generators' tests pass. Each mode completes and persists. |
+| **5. Other copy modes (trimmed)** | Random Groups: character set (letters, digits, punctuation, prosigns, custom string or Koch learned) and a fixed group length. Words: the bundled `v1-common`, `qcodes` and `cw-abbrev` lists, meaning shown after the answer, and the "only learned Koch characters" filter. Callsigns: the weighted worldwide prefix table and the 1×1–2×3 formats, plus "US only". Custom Practice: paste text, split by line or into N words per item, played in order. | Generators' tests pass. Each mode completes and persists. |
 | **6. ICR + adaptive** | ICR mode, response-time stats, adaptive weighting across modes. | QA item 5 passes. Adaptive tests pass. |
-| **7. Stats dashboard** | Tiles, character grid, confusion matrix, trends, calendar, history with session replay, "Practice my weak characters". | Dashboard renders from real and seeded data. Replay reproduces the same items. |
-| **8. Sending practice** | Keyboard straight key and paddles, iambic keyer, sidetone, decoder, timing analysis, free-send. **8b:** MIDI and serial in Rust. | QA item 6 passes. Decoder and keyer tests pass. |
-| **9. Realism + extras** | Noise, QSB, QRM, filter, pileup-lite, QSO simulation, goals, streaks, achievements, optional reminders. | Each feature can be toggled and persists. No audio regressions. |
-| **10. Release** | Icons, About, licenses, README rewrite (install notes for SmartScreen), `release.yml`, updater plugin wired to GitHub Releases. | A tag produces the Windows installer (plus the untested `.dmg`). The full QA checklist passes on Windows. |
+| **7. Stats dashboard (trimmed)** | Overview tiles (Koch level, 7-day accuracy, today's practice minutes, median ICR response time). Character grid, where clicking a tile shows its most-confused-with list. Session history as a simple list with scores, with no replay. "Practice my weak characters". | Dashboard renders from real and seeded data. |
+| **10. Release** | Icons, About, licenses, README rewrite (install notes for SmartScreen), `release.yml`, updater plugin wired to GitHub Releases. | A tag produces the Windows installer (plus the untested `.dmg`). The QA checklist passes on Windows, except item 6 (sending), which is deferred. |
+
+Phases 8 and 9 were dropped on 2026-10-23, and the release follows phase 7.
+
+### 15.1 Deferred ("maybe later")
+
+These stay described in the sections above for reference, but nothing in them is built unless the owner asks for it.
+
+- **Phase 8, sending practice (§7.9):** keyboard straight key and paddles, iambic keyer, sidetone, decoder, timing analysis, free-send, MIDI and serial input.
+- **Phase 9, realism and extras:** noise, QSB, QRM, filter, pileup-lite, QSO simulation (§7.6), daily goals, streaks, achievements and reminders (§7.11).
+- **Cut from phase 5:** random min/max group length, group count versus duration, the English top-100 and top-500 word lists, user-made word lists, portable and affix callsign forms, MASTER.SCP import, Custom Practice .txt import, shuffled order and streamed playback.
+- **Cut from phase 7:** confusion matrix, trend charts, calendar heatmap, sortable and filterable history, the per-trial diff in history, session replay, and the per-character trend line.
 
 ---
 
