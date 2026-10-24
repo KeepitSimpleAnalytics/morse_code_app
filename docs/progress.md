@@ -76,10 +76,12 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
   - Profiles saved on the removed QSO or Sending screens open on Koch, without an invalid-setting warning.
   - Koch and the Text Player share one keying scheduler (`src/audio/shared.ts`).
 
-## Open questions from phase 6
+## Phase 6 follow-ups (decided 2026-10-23)
 
-- SPEC §8.3 applies the Koch newest-character multiplier "on top". ICR's "Koch learned" set doesn't apply it, because ICR is about speed on every character, not drilling the newest one. Should it?
-- These were not built, and are suggestions only: "Drill these in ICR" from results; a note in the speed chip that a change applies from the next round or session; storing the timing source with each session.
+The owner asked me to research and decide these.
+
+- **ICR doesn't add Koch's newest-character multiplier.** Adaptive ICR already targets weak and slow characters, the way MorseCode.World's adaptive ICR trainer does. A newly learned character starts with no stats, so it is already weighted up (low accuracy, plus the recency bonus).
+- **Not built:** "Drill these in ICR", a speed-chip note saying a change applies from the next session, and storing the timing source with each session. They are small, but phase 5 and 6 are trimmed scope. Revisit only if the learner finds the speed behaviour confusing.
 
 ## How Phase 6 is put together
 
