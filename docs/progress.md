@@ -100,4 +100,13 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 4. `pnpm tauri dev` runs the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. Next is Phase 5 (trimmed, SPEC §15): Random Groups, Words, Callsigns and Custom Practice. It reuses the copy-mode pieces from phase 4: the diff and results panel in `KochScreen.tsx`, and `buildTrialRecord`. Also wire up "Practice these characters" on the Koch results.
+5. **Next: phases 5 and 6, back to back.** The owner asked on 2026-10-23 for both to be finished in one go. Present one combined task list, get it approved, then build phase 5, commit, build phase 6, commit.
+   - **Phase 5 (trimmed, SPEC §15 and §15.1):** Random Groups, Words, Callsigns and Custom Practice.
+     - Reuse the copy-mode pieces from phase 4: the diff, results and replay in `KochScreen.tsx` (move them into a shared component), `buildTrialRecord`, and the `epoch`/ticket pattern in `features/koch/controller.ts`.
+     - These modes are per item (SPEC §7, "Common pattern"): play, type, submit, with Repeat and Reveal, and a trial written per item. Koch is the only stream mode.
+     - Wire up "Practice these characters" on the Koch results, which opens Random Groups on those characters.
+     - Bundled data (`v1-common`, `qcodes`, `cw-abbrev`, `prefixes.json`) needs its source and license in `src/data/README.md`.
+   - **Phase 6 (in full, SPEC §7.2, §8.3):** the ICR screen, response-time stats (`ewmaRt` is already in `char_stats`), and adaptive weighting across modes.
+     - `src/core/adaptive.ts` already has the weights, including the response-time factor for ICR.
+     - Acceptance is QA 5: ICR timing feels immediate, with no stutter over 50 characters.
+   - After each phase: run the full checks, have the code-reviewer agent review the diff (in phase 4 it found real races), update this file, then commit.
