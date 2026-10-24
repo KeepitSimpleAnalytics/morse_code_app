@@ -11,12 +11,11 @@ import {
   type KochOrder,
 } from "../../core/koch";
 import {
-  audioMsOfGroups,
   groupOfToken,
   lessonOutcome,
   MIN_PASSING_AUDIO_MS,
   planLesson,
-  playedGroups,
+  playedPrompt,
   suggestStepBack,
   weakestChars,
   type LessonLength,
@@ -499,7 +498,10 @@ export async function resumeLesson(): Promise<void> {
   }
 }
 
-/** Stops a lesson early. What was played is scored, but the lesson can't pass. */
+/**
+ * Stops a lesson early. Only the characters that played are scored (the owner's
+ * call, 2026-10-23), and the lesson can't pass.
+ */
 export async function stopLesson(): Promise<void> {
   const phase = state().phase;
   if (phase === "starting") {
@@ -511,8 +513,8 @@ export async function stopLesson(): Promise<void> {
   silence();
   closeSegment();
   const r = run;
-  const groups = playedGroups(r.plan, r.maxHeard);
-  if (groups.length === 0) {
+  const played = playedPrompt(r.plan, r.maxHeard);
+  if (!played) {
     run = null;
     state().set({
       phase: "idle",
@@ -531,7 +533,7 @@ export async function stopLesson(): Promise<void> {
     }
     return;
   }
-  await scoreLesson(groups.join(" "), audioMsOfGroups(r.plan, groups.length), false);
+  await scoreLesson(played.text, played.audioMs, false);
 }
 
 /** Scores a lesson that played to the end. Also retries a lesson whose saving failed. */
@@ -543,8 +545,8 @@ export async function finishLesson(): Promise<void> {
 /** Retries saving a stopped lesson after a failure. */
 export async function retryStopped(): Promise<void> {
   if (state().phase !== "unsaved" || !run) return;
-  const groups = playedGroups(run.plan, run.maxHeard);
-  await scoreLesson(groups.join(" "), audioMsOfGroups(run.plan, groups.length), false);
+  const played = playedPrompt(run.plan, run.maxHeard);
+  if (played) await scoreLesson(played.text, played.audioMs, false);
 }
 
 async function scoreLesson(prompt: string, audioMs: number, completed: boolean): Promise<void> {

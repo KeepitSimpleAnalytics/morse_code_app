@@ -6,7 +6,7 @@ import {
   lessonOutcome,
   MIN_PASSING_AUDIO_MS,
   planLesson,
-  playedGroups,
+  playedPrompt,
   suggestStepBack,
   weakestChars,
   type LessonPlanInput,
@@ -78,14 +78,24 @@ describe("stopping early and resuming", () => {
   const plan = planLesson({ ...base, length: { kind: "groups", count: 5 } });
 
   it("nothing heard means nothing sent", () => {
-    expect(playedGroups(plan, null)).toEqual([]);
+    expect(playedPrompt(plan, null)).toBeNull();
   });
 
-  it("includes the group that was sounding", () => {
+  it("ends at the last character that started playing, not the end of its group", () => {
     // Tokens: 5 chars, gap, 5 chars... token 7 is the 2nd char of group 2.
-    expect(playedGroups(plan, 0)).toEqual(plan.groups.slice(0, 1));
-    expect(playedGroups(plan, 7)).toEqual(plan.groups.slice(0, 2));
-    expect(playedGroups(plan, plan.tokens.length - 1)).toEqual(plan.groups);
+    expect(playedPrompt(plan, 0)?.text).toBe(plan.groups[0]?.slice(0, 1));
+    expect(playedPrompt(plan, 7)?.text).toBe(`${plan.groups[0]} ${plan.groups[1]?.slice(0, 2)}`);
+    expect(playedPrompt(plan, plan.tokens.length - 1)?.text).toBe(plan.text);
+  });
+
+  it("a gap counts back to the character before it", () => {
+    expect(playedPrompt(plan, 5)?.text).toBe(plan.groups[0]);
+  });
+
+  it("audio runs to the end of the last character played", () => {
+    const one = playedPrompt(plan, 4);
+    expect(one?.audioMs).toBeCloseTo(audioMsOfGroups(plan, 1));
+    expect(playedPrompt(plan, plan.tokens.length - 1)?.audioMs).toBeCloseTo(plan.audioMs);
   });
 
   it("maps a token to its group", () => {

@@ -151,26 +151,27 @@ describe("Koch lesson flow", () => {
     expect(s().info?.level).toBe(1);
   });
 
-  it("stopping early scores only what was sent and can't pass", async () => {
+  it("stopping early scores only the characters that played, and can't pass", async () => {
     await koch.startLesson();
     await koch.beginLesson();
     const call = lastPlay();
-    // Hear the first group (tokens 0–4) and the start of the second.
+    // Hear the first group (tokens 0–4) and the first character of the second.
     for (const i of [0, 1, 2, 3, 4, 6]) call.listener.onToken?.(i);
     const sent = koch.currentPromptTokens();
-    const firstTwo = sent
-      .slice(0, 11)
+    const played = sent
+      .slice(0, 7)
       .map((t) => (t.type === "char" ? t.symbol.symbol : " "))
       .join("");
-    s().set({ typed: firstTwo });
+    s().set({ typed: played });
     await koch.stopLesson();
 
     expect(s().phase).toBe("results");
-    expect(s().result).toMatchObject({ completed: false, prompt: firstTwo });
-    expect(s().result?.score.accuracy).toBe(1);
+    expect(s().result).toMatchObject({ completed: false, prompt: played });
+    // The rest of the second group never played, so it isn't counted as missed.
+    expect(s().result?.score).toMatchObject({ accuracy: 1, sentCharCount: 6, misses: 0 });
     expect(s().result?.outcome).toMatchObject({ passed: false, notCounted: "stopped" });
     const [session] = await store.listSessions(requireProfile().id);
-    expect(session?.completed).toBe(false);
+    expect(session).toMatchObject({ completed: false, sentChars: 6 });
   });
 
   it("stopping before anything is heard scores nothing", async () => {

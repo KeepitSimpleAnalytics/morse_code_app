@@ -130,14 +130,27 @@ export function planLesson(input: LessonPlanInput): LessonPlan {
   }
 }
 
+export interface PlayedPrompt {
+  /** The sent text, up to and including the last character that started playing. */
+  readonly text: string;
+  /** Audio up to the end of that character (the lead-in is not counted). */
+  readonly audioMs: number;
+}
+
 /**
- * The text that was actually sent when a lesson is stopped early: every group
- * up to and including the one that was sounding. Empty if nothing was heard.
+ * What was actually sent when a lesson is stopped early: every character up to
+ * and including the one that was sounding. Characters that never played aren't
+ * part of it, so they are never scored as misses. Null if nothing was heard.
  */
-export function playedGroups(plan: LessonPlan, lastHeardToken: number | null): string[] {
-  if (lastHeardToken === null) return [];
-  const idx = plan.groupEndTokens.findIndex((end) => end >= lastHeardToken);
-  return plan.groups.slice(0, idx === -1 ? plan.groups.length : idx + 1);
+export function playedPrompt(plan: LessonPlan, lastHeardToken: number | null): PlayedPrompt | null {
+  if (lastHeardToken === null) return null;
+  let last = Math.min(lastHeardToken, plan.tokens.length - 1);
+  while (last >= 0 && plan.tokens[last]?.type !== "char") last--;
+  const token = plan.tokens[last];
+  if (!token) return null;
+  let end = 0;
+  for (const e of plan.elements) if (e.on && e.tokenIndex === last) end = e.start + e.dur;
+  return { text: plan.text.slice(0, token.sourceEnd), audioMs: end - LESSON_LEAD_IN_MS };
 }
 
 /** Audio time of a lesson's first `groupCount` groups (the lead-in is not counted). */

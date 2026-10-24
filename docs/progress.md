@@ -45,7 +45,7 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 - The streak flame and goal ring in the top bar, and the Keys and Realism settings sections, are dropped along with phases 8 and 9. The QSO and Sending screens were removed from the sidebar, so Ctrl+1…8 now cover the modes and Settings has no number. The daily-goal slider was removed; its setting key stays so saved values remain valid.
 - **Koch (phase 4, approved by the owner):**
   - A lesson is scored as one trial, with one alignment over the whole text, so losing your place doesn't wreck later groups.
-  - Stopping early scores the groups heard so far, including the one that was sounding. That lesson can't pass.
+  - Stopping early scores only the characters that started playing, so the unplayed rest of a group never counts as missed (owner, 2026-10-23). That lesson can't pass.
   - Lessons with under a minute of audio can't pass.
   - "Practice these characters" is hidden until phase 5 (it needs Random Groups).
   - During a lesson, only the timer and the typing box show.
@@ -67,7 +67,6 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 - Settings keys: `koch.lengthKind`, `koch.minutes`, `koch.groups`, `koch.groupSize` and `koch.introSeen`.
 - Concurrency: every awaiting action takes a ticket from `epoch`. Pause, Stop, leaving the screen and a profile switch move it on, so a stale action gives up after its await. Saving records `trialSaved` and `sessionClosed` on the running lesson, so a retry never writes twice.
 - A failure after the lesson is saved (moving up, or the step-back check) shows on the results screen. It never sends the user back.
-- Open question for the owner: a lesson stopped early scores the whole group that was sounding, so characters of that group that were never heard count as misses in the character stats.
 
 ## How Phase 3 is put together
 
@@ -97,7 +96,7 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 
 1. Read `CLAUDE.md`, then this file, then the SPEC section for the next phase.
 2. Ask the owner for the open items above.
-3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 4 commit: 272 TS tests and 8 Rust tests.
+3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 4 commit: 274 TS tests and 8 Rust tests.
 4. `pnpm tauri dev` runs the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
