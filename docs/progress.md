@@ -1,6 +1,6 @@
 # Progress and handoff notes
 
-Last updated 2026-10-24. Work happens on branch `v2`; nothing has been pushed yet.
+Last updated 2026-10-24. Work happens on branch `v2`, which is pushed to GitHub. `main` still holds v1.
 `SPEC.md` is the source of truth. This file records where the build stands against
 SPEC §15 and what is waiting on whom.
 
@@ -39,7 +39,13 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
    - **Item 12:** minimize mid-lesson. The lesson pauses, and the hidden time isn't counted.
    - Phase 3 items 3 and 7 were skipped by the owner and are still worth doing once before release.
 2. **Latency retest:** wired headphones on the Realtek analog jack. This is now low priority. The 40 ms limit only matters for sending sidetone, and sending practice (phase 8) has been dropped.
-3. **Push, CI and the first release:** pushes must go out as the KeepitSimple GitHub account, never robabrown. This PC has no KeepitSimple SSH key yet, so ask the owner how to set one up. CI has never run, and neither has `release.yml`. The first release then follows `docs/release.md`: switch Actions to read/write, tag, run the QA checklist on the draft's installer, publish.
+3. **Pushing and the first release:**
+   - Pushes go out over SSH as the KeepitSimple GitHub account, never robabrown. `origin` is `git@github.com:KeepitSimpleAnalytics/morse_code_app.git`, and the default key `~/.ssh/id_ed25519` authenticates as KeepitSimpleAnalytics.
+   - **No AI attribution in git (owner, 2026-10-24):** no `Co-Authored-By: Claude` or similar lines in commits or PRs. The older commits that had them were rewritten on `v2` before anyone else had it. A local backup branch, `backup/v2-before-trailer-strip`, can be deleted.
+   - CI first ran on 2026-10-24. The fixes it needed:
+     - `better-sqlite3` (tests only) ships prebuilt binaries, so its native build is now skipped (`pnpm.ignoredBuiltDependencies`). The compile had failed on the Windows runner.
+     - The Ctrl+digit test now uses Cmd on macOS.
+   - The first release follows `docs/release.md`: tag `v2.0.0`, run the QA checklist on the draft's installer, then publish. `release.yml` hasn't run yet.
 
 ## Decisions made so far (not yet revisited by the owner)
 

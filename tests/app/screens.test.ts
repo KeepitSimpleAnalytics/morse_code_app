@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SCREENS, SHORTCUT_SCREENS, screenById, shortcutIndex } from "../../src/app/screens";
-import { screenForShortcut } from "../../src/app/shortcuts";
+import { IS_MAC, screenForShortcut } from "../../src/app/shortcuts";
 import { layoutPattern } from "../../src/components/morse-layout";
 
 describe("screen registry", () => {
@@ -41,16 +41,20 @@ describe("screenForShortcut", () => {
       shiftKey: false,
       ...mods,
     }) as KeyboardEvent;
+  // Cmd on macOS, Ctrl elsewhere: Node reports the real platform in CI.
+  const primary = IS_MAC ? { metaKey: true } : { ctrlKey: true };
+  const other = IS_MAC ? { ctrlKey: true } : { metaKey: true };
 
-  it("maps Ctrl+digit to a screen", () => {
-    expect(screenForShortcut(key("Digit1", { ctrlKey: true }))).toBe("koch");
-    expect(screenForShortcut(key("Digit7", { ctrlKey: true }))).toBe("player");
+  it("maps the primary modifier plus a digit to a screen", () => {
+    expect(screenForShortcut(key("Digit1", primary))).toBe("koch");
+    expect(screenForShortcut(key("Digit7", primary))).toBe("player");
   });
 
   it("ignores digits without the modifier, with extra modifiers, and Digit0", () => {
     expect(screenForShortcut(key("Digit1"))).toBeNull();
-    expect(screenForShortcut(key("Digit1", { ctrlKey: true, shiftKey: true }))).toBeNull();
-    expect(screenForShortcut(key("Digit0", { ctrlKey: true }))).toBeNull();
+    expect(screenForShortcut(key("Digit1", other))).toBeNull();
+    expect(screenForShortcut(key("Digit1", { ...primary, shiftKey: true }))).toBeNull();
+    expect(screenForShortcut(key("Digit0", primary))).toBeNull();
   });
 });
 
