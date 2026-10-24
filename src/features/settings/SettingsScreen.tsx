@@ -52,7 +52,7 @@ const SECTIONS: readonly SectionDef[] = [
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
-/** Settings (SPEC §10.2). Keys, realism and sidetone settings arrive with phases 8 and 9. */
+/** Settings (SPEC §10.2). Keys and realism sections were dropped with phases 8 and 9 (§15.1). */
 export function SettingsScreen() {
   return (
     <div className={styles.page}>
@@ -255,7 +255,7 @@ function AudioSection() {
       </div>
       <Row
         label="Audio latency"
-        hint="Delay between the app and your ears. Under 40 ms feels instant when sending."
+        hint="Delay between the app and your ears. Under 40 ms feels instant."
       >
         <div className={styles.inline}>
           {latency && (
@@ -269,9 +269,7 @@ function AudioSection() {
         </div>
       </Row>
       {latency && latency.totalMs > LATENCY_WARN_MS && (
-        <p className={styles.callout}>
-          Bluetooth audio adds delay. Use wired headphones for sending practice.
-        </p>
+        <p className={styles.callout}>Bluetooth audio adds delay. Wired headphones are quicker.</p>
       )}
       {latencyError && <p className={styles.errorText}>Audio couldn't start: {latencyError}</p>}
     </Section>
@@ -421,17 +419,6 @@ function LearningSection() {
             set("learning.newestWeight", w);
           }}
           hint="How much more often the newest Koch character is sent."
-        />
-        <Slider
-          label="Daily goal"
-          min={5}
-          max={60}
-          step={5}
-          value={v["learning.dailyGoalMin"]}
-          display={`${v["learning.dailyGoalMin"]} min`}
-          onChange={(m) => {
-            set("learning.dailyGoalMin", m);
-          }}
         />
       </div>
     </Section>

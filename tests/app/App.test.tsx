@@ -43,9 +43,10 @@ describe("App shell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Random Groups" })).toBeInTheDocument();
   });
 
-  it("states honestly that unbuilt screens are not built yet", () => {
+  it("states honestly that unbuilt screens are not built yet", async () => {
     render(<App />);
-    expect(screen.getByText(/Not built yet\. Arrives in phase 4\./)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Instant Recognition" }));
+    expect(screen.getByText(/Not built yet\. Arrives in phase 6\./)).toBeInTheDocument();
   });
 
   it("applies the chosen theme to <html data-theme>", async () => {

@@ -5,6 +5,7 @@ import { screenForShortcut } from "./app/shortcuts";
 import { Sidebar } from "./components/shell/Sidebar";
 import { TopBar } from "./components/shell/TopBar";
 import { Banner } from "./components/ui";
+import { KochScreen } from "./features/koch/KochScreen";
 import { Onboarding } from "./features/onboarding/Onboarding";
 import { TextPlayer } from "./features/player/TextPlayer";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
@@ -71,6 +72,10 @@ function Shell() {
           ) : screen.id === "settings" ? (
             <div className={styles.inner}>
               <SettingsScreen />
+            </div>
+          ) : screen.id === "koch" ? (
+            <div className={styles.inner}>
+              <KochScreen />
             </div>
           ) : (
             <div className={styles.inner}>

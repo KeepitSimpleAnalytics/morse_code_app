@@ -1,6 +1,7 @@
 import { audioEngine } from "../../audio/engine";
 import { renderSamples } from "../../audio/offline-render";
-import { browserTimers, KeyingScheduler } from "../../audio/scheduler";
+import type { KeyingScheduler } from "../../audio/scheduler";
+import { getScheduler as getSharedScheduler } from "../../audio/shared";
 import { effectiveRiseMs } from "../../core/envelope";
 import { buildTimeline, type TimelineElement } from "../../core/timeline";
 import { computeTiming, type Timing } from "../../core/timing";
@@ -16,13 +17,7 @@ import { classifyEdit, tokenIndexAtOffset } from "./text-model";
 let scheduler: KeyingScheduler | null = null;
 
 async function getScheduler(): Promise<KeyingScheduler> {
-  const graph = await audioEngine.start();
-  scheduler ??= new KeyingScheduler({
-    clock: graph.ctx,
-    param: graph.keyGain,
-    timers: browserTimers,
-    outputLatencySec: () => audioEngine.outputLatencySec(),
-  });
+  scheduler = await getSharedScheduler();
   return scheduler;
 }
 
@@ -148,10 +143,20 @@ export function pause(): void {
 
 export function stop(): void {
   cancelSpeedRestart();
-  scheduler?.stop();
+  // The scheduler is shared: only silence it if the Player is the one using it.
+  if (state().status !== "idle") scheduler?.stop();
   pausedAtToken = null;
   live.reset();
   state().set({ status: "idle", active: null, liveQueued: 0 });
+}
+
+/**
+ * Hands the shared scheduler to another feature (Koch): stops playback and ends
+ * type-to-transmit, so the Player never appends to a scheduler it no longer owns.
+ */
+export async function releaseAudio(): Promise<void> {
+  if (state().liveMode) await setLiveMode(false);
+  else stop();
 }
 
 export function togglePlayPause(): void {
@@ -205,7 +210,7 @@ export async function setLiveMode(on: boolean): Promise<void> {
 
 /** Live mode: called with the previous and new text on every edit. */
 export function onLiveEdit(prev: string, next: string): void {
-  if (!state().liveMode || !scheduler) return;
+  if (!state().liveMode || state().status !== "live" || !scheduler) return;
   const edit = classifyEdit(prev, next);
   const timing = timingNow();
 

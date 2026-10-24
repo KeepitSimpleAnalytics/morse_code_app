@@ -1,3 +1,4 @@
+import { resetKoch } from "../features/koch/controller";
 import * as player from "../features/player/controller";
 import { usePlayerStore } from "../features/player/store";
 import { addNotice, errorText, requireStore, useApp } from "../state/app";
@@ -27,6 +28,7 @@ export const newId = (): string => crypto.randomUUID();
 /** Copies saved Player settings and the last screen into their feature stores. */
 function applyToFeatures(v: SettingsValues): void {
   player.stop();
+  resetKoch();
   usePlayerStore.getState().set({
     text: v["player.text"],
     speeds: v["player.speeds"],

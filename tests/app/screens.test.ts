@@ -12,17 +12,17 @@ describe("screen registry", () => {
   it("matches the sidebar grouping in SPEC §10.1", () => {
     const grouped = (group: string) => SCREENS.filter((s) => s.group === group).map((s) => s.id);
     expect(grouped("Learn")).toEqual(["koch", "icr"]);
-    expect(grouped("Practice")).toEqual(["groups", "words", "callsigns", "qso", "custom"]);
-    expect(grouped("Tools")).toEqual(["player", "sending"]);
+    expect(grouped("Practice")).toEqual(["groups", "words", "callsigns", "custom"]);
+    expect(grouped("Tools")).toEqual(["player"]);
     expect(grouped("Progress")).toEqual(["stats"]);
     expect(grouped("System")).toEqual(["settings"]);
   });
 
-  it("assigns Ctrl+1…9 to the first nine modes", () => {
-    expect(SHORTCUT_SCREENS).toHaveLength(9);
+  it("assigns Ctrl+1…8 to the modes, in sidebar order", () => {
+    expect(SHORTCUT_SCREENS).toHaveLength(8);
     expect(shortcutIndex("koch")).toBe(1);
-    expect(shortcutIndex("sending")).toBe(9);
-    expect(shortcutIndex("stats")).toBeNull();
+    expect(shortcutIndex("stats")).toBe(8);
+    expect(shortcutIndex("settings")).toBeNull();
   });
 
   it("throws on an unknown screen rather than falling back", () => {
@@ -44,7 +44,7 @@ describe("screenForShortcut", () => {
 
   it("maps Ctrl+digit to a screen", () => {
     expect(screenForShortcut(key("Digit1", { ctrlKey: true }))).toBe("koch");
-    expect(screenForShortcut(key("Digit8", { ctrlKey: true }))).toBe("player");
+    expect(screenForShortcut(key("Digit7", { ctrlKey: true }))).toBe("player");
   });
 
   it("ignores digits without the modifier, with extra modifiers, and Digit0", () => {

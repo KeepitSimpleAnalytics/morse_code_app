@@ -561,11 +561,11 @@ CREATE TABLE achievements (
 - **Window:** default 1200×800, minimum 960×640. Window size and position are remembered (`window-state`). Single instance.
 - **Left sidebar:**
   - **Learn:** Koch, ICR
-  - **Practice:** Groups, Words, Callsigns, QSO, Custom
-  - **Tools:** Text Player, Sending
+  - **Practice:** Groups, Words, Callsigns, Custom (QSO was dropped, §15.1)
+  - **Tools:** Text Player (Sending was dropped, §15.1)
   - **Progress:** Stats
   - **Settings** at the bottom
-- **Top bar:** profile switcher, streak flame with day count, today's minutes as a progress ring against the goal, and a speed chip (e.g. "20/15 WPM · 600 Hz") that opens the timing popover.
+- **Top bar:** profile switcher, and a speed chip (e.g. "20/15 WPM · 600 Hz") that opens the timing popover. The streak flame and goal ring were dropped with goals (§15.1).
 - **Theme:** light, dark or system. All colours come from tokens in `src/styles/tokens.css`. Contrast is WCAG AA or better.
 - **Production build:**
   - Disable the webview's default context menu (except in text fields).

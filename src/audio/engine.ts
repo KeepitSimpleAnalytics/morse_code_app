@@ -5,7 +5,7 @@ import type { GainParam } from "./keying";
  * gesture, resumed whenever needed, never closed while the app runs.
  *
  * Graph: OscillatorNode (sine, always running) → keyGain (keyed) → masterGain (volume)
- * → destination. The receiver filter, noise and QRM branches join in phase 9.
+ * → destination.
  */
 
 export interface AudioGraph {

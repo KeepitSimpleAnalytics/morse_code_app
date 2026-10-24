@@ -21,7 +21,7 @@ import styles from "./TopBar.module.css";
 
 /**
  * Top bar (SPEC §10.1): breadcrumb, speed chip with the timing popover, theme and
- * the profile switcher. The streak flame and goal ring arrive with goals in phase 9.
+ * the profile switcher.
  */
 export function TopBar() {
   const screen = screenById(useNavStore((s) => s.screen));

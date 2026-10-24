@@ -3,6 +3,14 @@ import { SCREENS, type ScreenId } from "../app/screens";
 import type { CodeFormat, WordSeparator } from "../core/code-text";
 import { DEFAULT_RISE_MS, RISE_MS_MAX, RISE_MS_MIN } from "../core/envelope";
 import { DEFAULT_KOCH_ORDER, KOCH_ORDERS, type KochOrderId } from "../core/koch";
+import {
+  KOCH_GROUP_LENGTHS,
+  LESSON_GROUPS_MAX,
+  LESSON_GROUPS_MIN,
+  LESSON_MINUTES_MAX,
+  LESSON_MINUTES_MIN,
+  type KochGroupSize,
+} from "../core/lesson";
 import { DEFAULT_SPEEDS, hydrateSpeeds, type Speeds } from "../core/speed";
 import { WORD_SPACING_MAX, WORD_SPACING_MIN } from "../core/timing";
 import { PLAYER_MAX_CHARS, PLAYER_SAMPLE_TEXT } from "../features/player/store";
@@ -29,11 +37,20 @@ const CODE_FORMATS = ["ascii", "dots", "phonetic"] as const satisfies readonly C
 const WORD_SEPS = ["slash", "space"] as const satisfies readonly WordSeparator[];
 const ORDER_IDS = KOCH_ORDERS.map((o) => o.id) as [KochOrderId, ...KochOrderId[]];
 const SCREEN_IDS = SCREENS.map((s) => s.id) as [ScreenId, ...ScreenId[]];
+/** Screens removed with phases 8 and 9 (SPEC §15.1). A saved one opens Koch instead. */
+const REMOVED_SCREENS: readonly unknown[] = ["qso", "sending"];
+const screen = z.preprocess(
+  (raw) => (REMOVED_SCREENS.includes(raw) ? "koch" : raw),
+  z.enum(SCREEN_IDS),
+);
 
 export const SHOW_CODE = ["never", "after", "live"] as const;
 export type ShowCode = (typeof SHOW_CODE)[number];
 export const ADVANCEMENT = ["prompt", "auto"] as const;
 export type Advancement = (typeof ADVANCEMENT)[number];
+export const LESSON_LENGTH_KINDS = ["minutes", "groups"] as const;
+export type LessonLengthKind = (typeof LESSON_LENGTH_KINDS)[number];
+const GROUP_SIZES = Object.keys(KOCH_GROUP_LENGTHS) as [KochGroupSize, ...KochGroupSize[]];
 
 export const SETTINGS = {
   /* Timing (training) */
@@ -58,7 +75,22 @@ export const SETTINGS = {
   "learning.advancement": { schema: z.enum(ADVANCEMENT), default: "prompt" as Advancement },
   "learning.adaptive": { schema: z.boolean(), default: true },
   "learning.newestWeight": { schema: num(1, 4), default: 2 },
+  /** Unused since goals were dropped (SPEC §15.1); kept so saved values stay valid. */
   "learning.dailyGoalMin": { schema: int(5, 60), default: 10 },
+
+  /* Koch lessons (§7.1) */
+  "koch.lengthKind": {
+    schema: z.enum(LESSON_LENGTH_KINDS),
+    default: "minutes" as LessonLengthKind,
+  },
+  "koch.minutes": { schema: int(LESSON_MINUTES_MIN, LESSON_MINUTES_MAX), default: 2 },
+  "koch.groups": { schema: int(LESSON_GROUPS_MIN, LESSON_GROUPS_MAX), default: 20 },
+  "koch.groupSize": { schema: z.enum(GROUP_SIZES), default: "fixed" as KochGroupSize },
+  /** Per Koch order, the highest level whose new-character intro has been shown. */
+  "koch.introSeen": {
+    schema: z.record(z.string(), z.number().int().nonnegative()),
+    default: {} as Record<string, number>,
+  },
 
   /* Text Player: its own speed and sound, separate from training (§7.8) */
   "player.text": { schema: z.string().max(PLAYER_MAX_CHARS), default: PLAYER_SAMPLE_TEXT },
@@ -71,7 +103,7 @@ export const SETTINGS = {
   "player.loop": { schema: z.boolean(), default: false },
 
   /* The last screen (v1 defect #9) */
-  "nav.screen": { schema: z.enum(SCREEN_IDS), default: "koch" as ScreenId },
+  "nav.screen": { schema: screen, default: "koch" as ScreenId },
 } as const;
 
 export type SettingKey = keyof typeof SETTINGS;

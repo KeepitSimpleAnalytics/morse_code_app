@@ -57,3 +57,16 @@ describe("settings hydration", () => {
     expect(() => validateSetting("player.speeds", { charWpm: 20, effWpm: 2 })).toThrow();
   });
 });
+
+describe("removed screens", () => {
+  it("a profile saved on QSO or Sending opens Koch, without an invalid-setting warning", () => {
+    for (const old of ["qso", "sending"]) {
+      const { values, invalid } = hydrateSettings({ "nav.screen": old });
+      expect(invalid).toEqual([]);
+      expect(values["nav.screen"]).toBe("koch");
+    }
+    expect(hydrateSettings({ "nav.screen": "bogus" }).invalid.map((i) => i.key)).toEqual([
+      "nav.screen",
+    ]);
+  });
+});
