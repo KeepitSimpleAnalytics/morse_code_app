@@ -1,0 +1,39 @@
+.button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  color: var(--color-text-subtle);
+}
+
+.button:hover {
+  color: var(--color-text);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: var(--space-2) var(--space-6);
+  align-items: baseline;
+}
+
+.list dd {
+  justify-self: end;
+}
+
+.list kbd {
+  padding: 1px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.or {
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
+}

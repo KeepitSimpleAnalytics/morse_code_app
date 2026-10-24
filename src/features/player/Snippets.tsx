@@ -1,8 +1,11 @@
-import { BookMarked, Check, Pencil, Save, Trash2, X } from "lucide-react";
+import { BookMarked, Check, NotebookPen, Pencil, Save, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { newId } from "../../app/session";
 import { Button, ConfirmDialog, Dialog, Field } from "../../components/ui";
 import { errorText, requireProfile, requireStore, useApp } from "../../state/app";
+import { useSettings } from "../../state/settings";
+import { CUSTOM_TEXT_MAX } from "../../state/settings-schema";
+import { practiseInCustom } from "../drill/practise";
 import type { Snippet } from "../../storage/schemas";
 import { SNIPPET_TITLE_MAX, suggestTitle } from "./snippets-model";
 import styles from "./Snippets.module.css";
@@ -11,8 +14,8 @@ import styles from "./Snippets.module.css";
 const timestamp = (): number => Date.now();
 
 /**
- * The snippet library (SPEC §7.8): named texts saved per profile. Sending a snippet
- * to Custom Practice arrives with that mode in phase 5.
+ * The snippet library (SPEC §7.8): named texts saved per profile. A snippet can
+ * also be sent to Custom Practice (§7.7).
  */
 export function SnippetsButton({ text, onLoad }: { text: string; onLoad: (body: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -57,6 +60,7 @@ function SnippetsDialog({
   const [title, setTitle] = useState(() => suggestTitle(text));
   const [editing, setEditing] = useState<{ id: string; title: string } | null>(null);
   const [deleting, setDeleting] = useState<Snippet | null>(null);
+  const [sending, setSending] = useState<Snippet | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
@@ -107,6 +111,36 @@ function SnippetsDialog({
     if (!t || t === s.title) return;
     attempt("Renaming", requireStore().saveSnippet({ ...s, title: t, updatedAt: timestamp() }));
   };
+
+  const send = (s: Snippet) => {
+    const result = practiseInCustom(s.body, s.title);
+    if (result === "tooLong") {
+      setError(
+        `“${s.title}” is ${s.body.length.toLocaleString()} characters; Custom Practice holds up to ${CUSTOM_TEXT_MAX.toLocaleString()}.`,
+      );
+    } else {
+      onClose();
+    }
+  };
+
+  if (sending) {
+    return (
+      <ConfirmDialog
+        title="Replace your Custom Practice text?"
+        confirmLabel="Replace"
+        onCancel={() => {
+          setSending(null);
+        }}
+        onConfirm={() => {
+          const s = sending;
+          setSending(null);
+          send(s);
+        }}
+      >
+        <p>Custom Practice already has other text. Loading “{sending.title}” replaces it.</p>
+      </ConfirmDialog>
+    );
+  }
 
   if (deleting) {
     return (
@@ -223,6 +257,15 @@ function SnippetsDialog({
                   </>
                 ) : (
                   <>
+                    <IconButton
+                      label={`Practise ${s.title} in Custom`}
+                      icon={NotebookPen}
+                      onClick={() => {
+                        const current = useSettings.getState().values["custom.text"];
+                        if (current.trim() !== "" && current !== s.body) setSending(s);
+                        else send(s);
+                      }}
+                    />
                     <IconButton
                       label={`Rename ${s.title}`}
                       icon={Pencil}

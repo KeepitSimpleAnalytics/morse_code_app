@@ -21,21 +21,16 @@ import {
   LESSON_MINUTES_MIN,
   type KochGroupSize,
 } from "../../core/lesson";
-import type { AlignmentOp } from "../../core/scoring";
-import { tokenize } from "../../core/tokenize";
 import { useApp } from "../../state/app";
 import { useSettings } from "../../state/settings";
 import type { LessonLengthKind } from "../../state/settings-schema";
+import { Diff, DiffLegend, LiveCode, ScoreMetrics, WeakChars } from "../copy/CopyParts";
+import { clock, pct } from "../copy/format";
+import ui from "../copy/copy.module.css";
+import { practiseChars } from "../drill/practise";
 import * as koch from "./controller";
 import { useKochStore, type LessonResult, type LevelInfo } from "./store";
 import styles from "./KochScreen.module.css";
-
-const pct = (v: number) => `${Math.round(v * 100)}%`;
-
-function clock(ms: number): string {
-  const s = Math.ceil(ms / 1000);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
 
 /** Koch Lessons (SPEC §7.1). */
 export function KochScreen() {
@@ -96,10 +91,10 @@ export function KochScreen() {
   }, []);
 
   return (
-    <div className={styles.page}>
+    <div className={ui.page}>
       <header>
-        <p className={styles.eyebrow}>Learn</p>
-        <h1 className={styles.title}>Koch Lessons</h1>
+        <p className={ui.eyebrow}>Learn</p>
+        <h1 className={ui.title}>Koch Lessons</h1>
       </header>
       {error && (
         <Banner
@@ -123,9 +118,9 @@ export function KochScreen() {
       )}
       <ResultAnnouncer />
       {phase === "loading" ? (
-        <div className={styles.card} aria-busy={error ? undefined : true}>
+        <div className={ui.card} aria-busy={error ? undefined : true}>
           {error && (
-            <div className={styles.startRow}>
+            <div className={ui.startRow}>
               <Button onClick={() => void koch.loadLevel()}>Try again</Button>
             </div>
           )}
@@ -162,7 +157,7 @@ function ResultAnnouncer() {
     }
   }
   return (
-    <p className={styles.srOnly} role="status">
+    <p className={ui.srOnly} role="status">
       {text}
     </p>
   );
@@ -202,15 +197,15 @@ function LevelCard() {
   const newest = info.chars[info.chars.length - 1] ?? "";
   const order = kochOrder(info.orderId);
   return (
-    <section className={styles.card} aria-labelledby="koch-level">
+    <section className={ui.card} aria-labelledby="koch-level">
       <div className={styles.levelHead}>
         <div>
-          <p className={styles.kicker}>{order.name} order</p>
+          <p className={ui.kicker}>{order.name} order</p>
           <h2 id="koch-level" className={styles.levelTitle}>
             Level {info.level}
             <span className={styles.levelOf}> of {info.maxLevel}</span>
           </h2>
-          <p className={styles.muted}>
+          <p className={ui.muted}>
             {info.chars.length} characters learned · newest <strong>{newest}</strong>
           </p>
         </div>
@@ -230,7 +225,7 @@ function LevelCard() {
           <CharTile key={ch} ch={ch} info={info} isNew={ch === newest} />
         ))}
       </ul>
-      <div className={styles.actions}>
+      <div className={ui.actions}>
         <Button size="sm" icon={Volume2} onClick={() => void koch.openIntro()}>
           {info.level === 1 ? "Hear K and M" : `Hear ${newest} again`}
         </Button>
@@ -322,13 +317,13 @@ function LessonSetup() {
   const v = useSettings((s) => s.values);
   const setSetting = useSettings((s) => s.set);
   return (
-    <section className={styles.card} aria-labelledby="koch-setup">
-      <h2 id="koch-setup" className={styles.cardTitle}>
+    <section className={ui.card} aria-labelledby="koch-setup">
+      <h2 id="koch-setup" className={ui.cardTitle}>
         Lesson
       </h2>
-      <div className={styles.setupGrid}>
-        <div className={styles.setupItem}>
-          <span className={styles.label}>Length</span>
+      <div className={ui.setupGrid}>
+        <div className={ui.setupItem}>
+          <span className={ui.label}>Length</span>
           <Segmented<LessonLengthKind>
             label="Lesson length"
             value={v["koch.lengthKind"]}
@@ -366,8 +361,8 @@ function LessonSetup() {
             />
           )}
         </div>
-        <div className={styles.setupItem}>
-          <span className={styles.label}>Group size</span>
+        <div className={ui.setupItem}>
+          <span className={ui.label}>Group size</span>
           <Segmented<KochGroupSize>
             label="Group size"
             value={v["koch.groupSize"]}
@@ -381,11 +376,11 @@ function LessonSetup() {
           />
         </div>
       </div>
-      <div className={styles.startRow}>
+      <div className={ui.startRow}>
         <Button variant="primary" icon={Play} onClick={() => void koch.startLesson()}>
           Start lesson
         </Button>
-        <span className={styles.muted}>
+        <span className={ui.muted}>
           <kbd>{PRIMARY_MODIFIER_LABEL}</kbd>+<kbd>Enter</kbd> to start, <kbd>Esc</kbd> to stop.
           Type what you hear as you go. Speed and tone are in the chip at the top.
         </span>
@@ -400,11 +395,11 @@ function IntroPanel() {
   const intro = useKochStore((s) => s.intro);
   if (!intro) return null;
   return (
-    <section className={styles.card} aria-labelledby="koch-intro">
-      <h2 id="koch-intro" className={styles.cardTitle}>
+    <section className={ui.card} aria-labelledby="koch-intro">
+      <h2 id="koch-intro" className={ui.cardTitle}>
         {intro.chars.length > 1 ? "Your first two characters" : "A new character"}
       </h2>
-      <p className={styles.muted}>
+      <p className={ui.muted}>
         Listen to the rhythm, not the dots and dashes. Each one plays three times.
       </p>
       <div className={styles.introChars}>
@@ -419,7 +414,7 @@ function IntroPanel() {
               <span className={styles.introGlyph}>{ch}</span>
               {sym && <MorsePills pattern={sym.pattern} size="md" />}
               <span className={styles.introPhonetic}>{sym?.phonetic}</span>
-              {sym?.name && <span className={styles.muted}>{sym.name}</span>}
+              {sym?.name && <span className={ui.muted}>{sym.name}</span>}
               <Button
                 size="sm"
                 variant="ghost"
@@ -433,7 +428,7 @@ function IntroPanel() {
           );
         })}
       </div>
-      <div className={styles.startRow}>
+      <div className={ui.startRow}>
         <Button variant="primary" icon={Play} onClick={() => void koch.beginLesson()}>
           {intro.playing ? "Skip and start lesson" : "Start lesson"}
         </Button>
@@ -462,9 +457,9 @@ function LessonPanel() {
   }, [phase]);
 
   return (
-    <section className={styles.card} aria-labelledby="koch-lesson">
-      <div className={styles.lessonHead}>
-        <h2 id="koch-lesson" className={styles.cardTitle}>
+    <section className={ui.card} aria-labelledby="koch-lesson">
+      <div className={ui.lessonHead}>
+        <h2 id="koch-lesson" className={ui.cardTitle}>
           {phase === "paused"
             ? "Paused"
             : phase === "starting" || phase === "resuming"
@@ -482,7 +477,7 @@ function LessonPanel() {
         </span>
       </div>
       {phase === "paused" && (
-        <p className={styles.muted}>
+        <p className={ui.muted}>
           {pausedBy === "hidden"
             ? "The window was hidden, so the lesson paused. "
             : pausedBy === "left"
@@ -492,19 +487,19 @@ function LessonPanel() {
         </p>
       )}
       {phase === "finishing" && (
-        <p className={styles.muted}>
+        <p className={ui.muted}>
           That was the last group. Finish typing it, then press <kbd>Enter</kbd> to score.
         </p>
       )}
       {phase === "unsaved" && (
-        <p className={styles.muted}>
+        <p className={ui.muted}>
           The stopped lesson couldn't be saved. Your typing is kept, so you can try again.
         </p>
       )}
-      {showCode === "live" && phase === "playing" && <LiveCode tokenIndex={heardToken} />}
+      {showCode === "live" && phase === "playing" && <LiveCode pattern={livePattern(heardToken)} />}
       <textarea
         ref={ref}
-        className={styles.copyBox}
+        className={ui.copyBox}
         value={typed}
         aria-label="Your copy"
         spellCheck={false}
@@ -522,7 +517,7 @@ function LessonPanel() {
           }
         }}
       />
-      <div className={styles.startRow}>
+      <div className={ui.startRow}>
         {phase === "finishing" ? (
           <Button variant="primary" onClick={() => void koch.finishLesson()}>
             Score lesson
@@ -559,16 +554,10 @@ function LessonPanel() {
   );
 }
 
-/** "Show code: live": the pattern of the character being heard (SPEC §10.4). */
-function LiveCode({ tokenIndex }: { tokenIndex: number | null }) {
-  const prompt = koch.currentPromptTokens();
-  const token = tokenIndex === null ? undefined : prompt[tokenIndex];
-  const pattern = token?.type === "char" ? token.symbol.pattern : "";
-  return (
-    <div className={styles.liveCode} aria-hidden="true">
-      {pattern && <MorsePills pattern={pattern} size="md" />}
-    </div>
-  );
+/** The pattern of the character being heard, for "Show code: live". */
+function livePattern(tokenIndex: number | null): string {
+  const token = tokenIndex === null ? undefined : koch.currentPromptTokens()[tokenIndex];
+  return token?.type === "char" ? token.symbol.pattern : "";
 }
 
 /* Results ----------------------------------------------------------------- */
@@ -576,42 +565,22 @@ function LiveCode({ tokenIndex }: { tokenIndex: number | null }) {
 function ResultsPanel() {
   const result = useKochStore((s) => s.result);
   const replaying = useKochStore((s) => s.replaying);
+  const replayToken = useKochStore((s) => s.replayToken);
   if (!result) return null;
   const { score } = result;
   return (
     <>
-      <section className={styles.card} aria-labelledby="koch-results">
-        <h2 id="koch-results" className={styles.cardTitle}>
+      <section className={ui.card} aria-labelledby="koch-results">
+        <h2 id="koch-results" className={ui.cardTitle}>
           Lesson results · level {result.level}
         </h2>
-        <dl className={styles.metrics}>
-          <div>
-            <dt>Accuracy</dt>
-            <dd className={styles.metricBig}>{pct(score.accuracy)}</dd>
-          </div>
-          <div>
-            <dt>Correct</dt>
-            <dd>
-              {score.correct} / {score.sentCharCount}
-            </dd>
-          </div>
-          <div>
-            <dt>Characters per minute</dt>
-            <dd>{Math.round(result.cpm)}</dd>
-          </div>
-          <div>
-            <dt>Errors</dt>
-            <dd>
-              {score.substitutions} wrong · {score.misses} missed · {score.insertions} extra
-            </dd>
-          </div>
-        </dl>
+        <ScoreMetrics score={score} cpm={result.cpm} />
         <Outcome result={result} />
       </section>
 
-      <section className={styles.card} aria-labelledby="koch-diff">
-        <div className={styles.lessonHead}>
-          <h2 id="koch-diff" className={styles.cardTitle}>
+      <section className={ui.card} aria-labelledby="koch-diff">
+        <div className={ui.lessonHead}>
+          <h2 id="koch-diff" className={ui.cardTitle}>
             What was sent, and what you typed
           </h2>
           {replaying ? (
@@ -624,27 +593,12 @@ function ResultsPanel() {
             </Button>
           )}
         </div>
-        <Diff ops={score.ops} prompt={result.prompt} />
-        <p className={styles.legend}>
-          <span className={styles.legendSub}>H/s</span> heard as something else ·{" "}
-          <span className={styles.legendMiss}>_</span> missed ·{" "}
-          <span className={styles.legendIns}>+x</span> extra
-        </p>
-        {result.weak.length > 0 && (
-          <div className={styles.weak}>
-            <h3 className={styles.label}>Weakest this lesson</h3>
-            <ul className={styles.weakList}>
-              {result.weak.map((w) => (
-                <li key={w.ch}>
-                  <strong>{w.ch}</strong> {w.correct}/{w.attempts}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <Diff ops={score.ops} prompt={result.prompt} replayToken={replayToken} />
+        <DiffLegend />
+        <WeakChars title="Weakest this lesson" weak={result.weak} onPractise={practiseChars} />
       </section>
 
-      <div className={styles.startRow}>
+      <div className={ui.startRow}>
         <Button variant="primary" icon={RotateCcw} onClick={() => void koch.startLesson()}>
           Next lesson
         </Button>
@@ -660,12 +614,12 @@ function Outcome({ result }: { result: LessonResult }) {
   const { outcome, decision } = result;
   if (outcome.notCounted === "stopped") {
     return (
-      <p className={styles.outcome}>Stopped early: scored, but it doesn't count towards passing.</p>
+      <p className={ui.outcome}>Stopped early: scored, but it doesn't count towards passing.</p>
     );
   }
   if (outcome.notCounted === "short") {
     return (
-      <p className={styles.outcome}>
+      <p className={ui.outcome}>
         Lessons under a minute are scored but don't count towards passing.
       </p>
     );
@@ -673,28 +627,28 @@ function Outcome({ result }: { result: LessonResult }) {
   if (outcome.passed) {
     if (outcome.nextChar === null) {
       return (
-        <p className={`${styles.outcome} ${styles.pass}`}>
+        <p className={`${ui.outcome} ${ui.pass}`}>
           You passed, and you've learned every character in this order.
         </p>
       );
     }
     if (decision === "advanced") {
       return (
-        <p className={`${styles.outcome} ${styles.pass}`}>
+        <p className={`${ui.outcome} ${ui.pass}`}>
           {result.autoAdvanced ? "You passed and moved up" : "Moved up"} to level {result.level + 1}
           . Next lesson adds <strong>{outcome.nextChar}</strong>.
         </p>
       );
     }
     if (decision === "stayed") {
-      return <p className={styles.outcome}>Staying at level {result.level}.</p>;
+      return <p className={ui.outcome}>Staying at level {result.level}.</p>;
     }
     return (
-      <div className={`${styles.outcome} ${styles.pass}`}>
+      <div className={`${ui.outcome} ${ui.pass}`}>
         <p>
           You passed! Add <strong>{outcome.nextChar}</strong>?
         </p>
-        <div className={styles.actions}>
+        <div className={ui.actions}>
           <Button
             variant="primary"
             size="sm"
@@ -712,19 +666,19 @@ function Outcome({ result }: { result: LessonResult }) {
   }
   if (result.suggestStepBack) {
     if (decision === "steppedBack") {
-      return <p className={styles.outcome}>Back to level {result.level - 1}.</p>;
+      return <p className={ui.outcome}>Back to level {result.level - 1}.</p>;
     }
     if (decision === "stayed") {
-      return <p className={styles.outcome}>Staying at level {result.level}.</p>;
+      return <p className={ui.outcome}>Staying at level {result.level}.</p>;
     }
     return (
-      <div className={styles.outcome}>
+      <div className={ui.outcome}>
         <p>
           Your last three lessons here were below{" "}
           {pct(useSettings.getState().values["learning.regressionFloor"])}. Going back a level for a
           while often helps.
         </p>
-        <div className={styles.actions}>
+        <div className={ui.actions}>
           <Button size="sm" icon={ArrowDownToLine} onClick={() => void koch.stepBack()}>
             Go back to level {result.level - 1}
           </Button>
@@ -736,71 +690,8 @@ function Outcome({ result }: { result: LessonResult }) {
     );
   }
   return (
-    <p className={styles.outcome}>
+    <p className={ui.outcome}>
       {pct(useSettings.getState().values["learning.passThreshold"])} passes this level. Keep at it.
     </p>
-  );
-}
-
-/** The aligned diff (SPEC §8.2): colour plus a symbol, so meaning never relies on colour. */
-function Diff({ ops, prompt }: { ops: readonly AlignmentOp[]; prompt: string }) {
-  const replayToken = useKochStore((s) => s.replayToken);
-  const showCode = useSettings((s) => s.values["display.showCode"]);
-  const tokens = tokenize(prompt).tokens;
-  let sentIdx = -1;
-  return (
-    <div className={styles.diff}>
-      {ops.map((op, i) => {
-        const hasSent =
-          op.op === "correct" ||
-          op.op === "substituted" ||
-          op.op === "missed" ||
-          (op.op === "gap" && op.kind !== "inserted");
-        if (hasSent) sentIdx++;
-        const current = hasSent && sentIdx === replayToken;
-        if (op.op === "gap") {
-          return <span key={i} className={styles.diffGap} aria-hidden="true" />;
-        }
-        const tok = op.op === "inserted" ? undefined : tokens[sentIdx];
-        const code = showCode !== "never" && tok?.type === "char" ? tok.symbol.pattern : null;
-        const cls =
-          op.op === "correct"
-            ? styles.cellOk
-            : op.op === "substituted"
-              ? styles.cellSub
-              : op.op === "missed"
-                ? styles.cellMiss
-                : styles.cellIns;
-        const label =
-          op.op === "correct"
-            ? `${op.sent} correct`
-            : op.op === "substituted"
-              ? `${op.sent} typed as ${op.typed}`
-              : op.op === "missed"
-                ? `${op.sent} missed`
-                : `extra ${op.typed}`;
-        return (
-          <span
-            key={i}
-            className={[styles.cell, cls, current ? styles.cellCurrent : ""].join(" ")}
-            role="img"
-            aria-label={label}
-            title={label}
-          >
-            <span className={styles.cellSent}>{op.op === "inserted" ? "" : op.sent}</span>
-            <span className={styles.cellTyped}>
-              {op.op === "substituted"
-                ? op.typed.toLowerCase()
-                : op.op === "missed"
-                  ? "_"
-                  : op.op === "inserted"
-                    ? `+${op.typed.toLowerCase()}`
-                    : ""}
-            </span>
-            {code && <span className={styles.cellCode}>{code}</span>}
-          </span>
-        );
-      })}
-    </div>
   );
 }

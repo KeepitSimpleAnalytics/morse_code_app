@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { SCREENS, type ScreenId } from "../app/screens";
 import type { CodeFormat, WordSeparator } from "../core/code-text";
+import { WORD_LIST_IDS, type WordListId } from "../core/bundled";
+import { WORDS_PER_ITEM_MAX, WORDS_PER_ITEM_MIN } from "../core/chunk";
+import { DRILL_ITEMS_DEFAULT, DRILL_ITEMS_MAX, DRILL_ITEMS_MIN } from "../core/drill";
 import { DEFAULT_RISE_MS, RISE_MS_MAX, RISE_MS_MIN } from "../core/envelope";
+import { CALLSIGN_FORMATS, type CallsignFormat } from "../core/generators/callsigns";
+import { GROUP_LENGTH_MAX, GROUP_LENGTH_MIN } from "../core/generators/groups";
 import { DEFAULT_KOCH_ORDER, KOCH_ORDERS, type KochOrderId } from "../core/koch";
 import {
   KOCH_GROUP_LENGTHS,
@@ -52,6 +57,18 @@ export const LESSON_LENGTH_KINDS = ["minutes", "groups"] as const;
 export type LessonLengthKind = (typeof LESSON_LENGTH_KINDS)[number];
 const GROUP_SIZES = Object.keys(KOCH_GROUP_LENGTHS) as [KochGroupSize, ...KochGroupSize[]];
 
+/** Random Groups draws from character classes, a custom string, or the learned Koch characters. */
+export const GROUP_SOURCES = ["classes", "custom", "koch"] as const;
+export type GroupSource = (typeof GROUP_SOURCES)[number];
+export const WEIGHTINGS = ["adaptive", "uniform"] as const;
+export type Weighting = (typeof WEIGHTINGS)[number];
+export const CHUNK_KINDS = ["line", "words"] as const;
+export type ChunkKind = (typeof CHUNK_KINDS)[number];
+export const CUSTOM_CHARSET_MAX = 200;
+/** Custom Practice text; the same limit as the Text Player. */
+export const CUSTOM_TEXT_MAX = PLAYER_MAX_CHARS;
+const items = int(DRILL_ITEMS_MIN, DRILL_ITEMS_MAX);
+
 export const SETTINGS = {
   /* Timing (training) */
   "timing.speeds": { schema: speeds, default: DEFAULT_SPEEDS },
@@ -91,6 +108,38 @@ export const SETTINGS = {
     schema: z.record(z.string(), z.number().int().nonnegative()),
     default: {} as Record<string, number>,
   },
+
+  /* Random Groups (§7.3) */
+  "groups.source": { schema: z.enum(GROUP_SOURCES), default: "classes" as GroupSource },
+  "groups.letters": { schema: z.boolean(), default: true },
+  "groups.digits": { schema: z.boolean(), default: false },
+  "groups.punct": { schema: z.boolean(), default: false },
+  "groups.prosigns": { schema: z.boolean(), default: false },
+  "groups.custom": { schema: z.string().max(CUSTOM_CHARSET_MAX), default: "" },
+  "groups.length": { schema: int(GROUP_LENGTH_MIN, GROUP_LENGTH_MAX), default: 5 },
+  "groups.weighting": { schema: z.enum(WEIGHTINGS), default: "adaptive" as Weighting },
+  "groups.items": { schema: items, default: DRILL_ITEMS_DEFAULT },
+
+  /* Words (§7.4) */
+  "words.list": { schema: z.enum(WORD_LIST_IDS), default: "v1-common" as WordListId },
+  "words.learnedOnly": { schema: z.boolean(), default: false },
+  "words.items": { schema: items, default: DRILL_ITEMS_DEFAULT },
+
+  /* Callsigns (§7.5) */
+  "callsigns.formats": {
+    schema: z
+      .array(z.enum(CALLSIGN_FORMATS))
+      .min(1)
+      .refine((a) => new Set(a).size === a.length, "formats repeat"),
+    default: [...CALLSIGN_FORMATS] as CallsignFormat[],
+  },
+  "callsigns.usOnly": { schema: z.boolean(), default: false },
+  "callsigns.items": { schema: items, default: DRILL_ITEMS_DEFAULT },
+
+  /* Custom Practice (§7.7) */
+  "custom.text": { schema: z.string().max(CUSTOM_TEXT_MAX), default: "" },
+  "custom.split": { schema: z.enum(CHUNK_KINDS), default: "line" as ChunkKind },
+  "custom.wordsPerItem": { schema: int(WORDS_PER_ITEM_MIN, WORDS_PER_ITEM_MAX), default: 3 },
 
   /* Text Player: its own speed and sound, separate from training (§7.8) */
   "player.text": { schema: z.string().max(PLAYER_MAX_CHARS), default: PLAYER_SAMPLE_TEXT },

@@ -1,3 +1,4 @@
+import { resetDrills } from "../features/drill/controller";
 import { resetKoch } from "../features/koch/controller";
 import * as player from "../features/player/controller";
 import { usePlayerStore } from "../features/player/store";
@@ -29,6 +30,7 @@ export const newId = (): string => crypto.randomUUID();
 function applyToFeatures(v: SettingsValues): void {
   player.stop();
   resetKoch();
+  resetDrills();
   usePlayerStore.getState().set({
     text: v["player.text"],
     speeds: v["player.speeds"],

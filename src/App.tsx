@@ -2,9 +2,13 @@ import { DatabaseZap } from "lucide-react";
 import { useEffect } from "react";
 import { screenById } from "./app/screens";
 import { screenForShortcut } from "./app/shortcuts";
+import { ShortcutsOverlay } from "./components/shell/Shortcuts";
+import { useShortcutsKey } from "./components/shell/shortcuts-state";
 import { Sidebar } from "./components/shell/Sidebar";
 import { TopBar } from "./components/shell/TopBar";
 import { Banner } from "./components/ui";
+import { DrillScreen } from "./features/drill/DrillScreen";
+import { isDrillMode } from "./features/drill/store";
 import { KochScreen } from "./features/koch/KochScreen";
 import { Onboarding } from "./features/onboarding/Onboarding";
 import { TextPlayer } from "./features/player/TextPlayer";
@@ -43,6 +47,7 @@ function Phase() {
 function Shell() {
   const screenId = useNavStore((s) => s.screen);
   const go = useNavStore((s) => s.go);
+  useShortcutsKey();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -77,6 +82,10 @@ function Shell() {
             <div className={styles.inner}>
               <KochScreen />
             </div>
+          ) : isDrillMode(screen.id) ? (
+            <div className={styles.inner}>
+              <DrillScreen key={screen.id} mode={screen.id} />
+            </div>
           ) : (
             <div className={styles.inner}>
               <ScreenIntro key={screen.id} screen={screen} />
@@ -84,6 +93,7 @@ function Shell() {
           )}
         </main>
       </div>
+      <ShortcutsOverlay />
     </div>
   );
 }

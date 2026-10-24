@@ -375,7 +375,10 @@ function LearningSection() {
           }}
         />
       </Row>
-      <Row label="Adaptive practice" hint="Characters you miss come up more often.">
+      <Row
+        label="Adaptive Koch and ICR"
+        hint="Characters you miss (and, in ICR, answer slowly) come up more often. Random Groups has its own setting."
+      >
         <Toggle
           pressed={v["learning.adaptive"]}
           onChange={(on) => {

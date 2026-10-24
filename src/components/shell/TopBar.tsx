@@ -16,6 +16,7 @@ import { addNotice, errorText, useApp } from "../../state/app";
 import { useNavStore } from "../../state/nav";
 import { useSettings } from "../../state/settings";
 import { Slider } from "../controls";
+import { ShortcutsButton } from "./Shortcuts";
 import { ThemeSwitch } from "./ThemeSwitch";
 import styles from "./TopBar.module.css";
 
@@ -37,6 +38,7 @@ export function TopBar() {
       </p>
       <div className={styles.actions}>
         <SpeedChip />
+        <ShortcutsButton />
         <ThemeSwitch />
         <ProfileSwitcher />
       </div>
@@ -65,6 +67,8 @@ function Popover({
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        // Handled here, so Esc doesn't also stop a lesson or session underneath.
+        e.preventDefault();
         setOpen(false);
         ref.current?.querySelector<HTMLElement>("button")?.focus();
       }

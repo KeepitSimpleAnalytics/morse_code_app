@@ -14,7 +14,7 @@ SPEC §15 and what is waiting on whom.
 | (extra) Live speed change while playing | Done.                                                                                                 | 09029a4          |
 | 3. Storage, profiles, settings          | Built. The owner skipped QA 3 and 7 on 2026-10-23.                                                    | 8ec5d62          |
 | 4. Koch, scoring UI, session flow       | Built. Waiting for the owner to run a full lesson in `pnpm tauri dev` (QA 2).                         | see git log      |
-| 5. Other copy modes (trimmed)           | Not started.                                                                                          | —                |
+| 5. Other copy modes (trimmed)           | Built. Waiting for the owner to complete and persist a session in each mode in `pnpm tauri dev`.      | see git log      |
 | 6. ICR + adaptive                       | Not started.                                                                                          | —                |
 | 7. Stats dashboard (trimmed)            | Not started.                                                                                          | —                |
 | 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
@@ -36,6 +36,19 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 3. **Push and CI:** pushes must go out as the KeepitSimple GitHub account, never robabrown. This PC has no KeepitSimple SSH key yet, so ask the owner how to set one up. CI has never run.
 
 ## Decisions made so far (not yet revisited by the owner)
+
+- **Phase 5 (owner, 2026-10-23):** a per-item session is 10 items by default (5–50 per mode). Custom Practice plays every chunk.
+- **Phase 5 (owner, 2026-10-23):** adaptive weighting applies to drawn characters only (Koch, Random Groups, ICR). Words and Callsigns are drawn uniformly but still feed the character stats.
+- **Phase 5 (my calls):**
+  - Random Groups has its own Uniform/Adaptive choice (SPEC §7.3), default Adaptive. Settings → Learning → "Adaptive" now reads "Adaptive Koch and ICR".
+  - "Practice these characters" opens Random Groups on those characters as a one-off override, shown as a chip with "Use my character set". It is never saved, and it needs two or more weak characters.
+  - Leaving a practice screen or hiding the window pauses. Resuming replays an item that was cut off, and that replay isn't counted as a Repeat.
+  - Copy modes record no response time, so they never touch `ewmaRt`.
+  - Esc on the last item's feedback counts as finishing the session.
+  - A snippet sent to Custom asks before replacing different text, and one over 20,000 characters is refused, never cut short.
+  - Bundled data was checked by a research pass. QRJ, PKT, AGE, SE and C6 were dropped, ELE became EL, and HB/PJ/VR/3D only take the digits that mean their country. See `src/data/README.md`.
+  - Added the `?` shortcut overlay (SPEC §10.3), which had never been built, with a keyboard button in the top bar. Esc in the speed popover no longer also stops a lesson.
+  - The diff now follows Settings → Display → Code format (it always showed dots and dashes before).
 
 - "(" and `<KN>`, and "+" and `<AR>`, score as the same sound. Typed non-Morse characters count as wrong.
 - Pause resumes at the start of the current character. A speed change while playing restarts the current character after a 250 ms debounce.
@@ -59,6 +72,21 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
   - "Best lesson here", the lesson count and the step-back check only count lessons with at least a minute of audio (the snapshot records `audioMs`).
   - Profiles saved on the removed QSO or Sending screens open on Koch, without an invalid-setting warning.
   - Koch and the Text Player share one keying scheduler (`src/audio/shared.ts`).
+
+## How Phase 5 is put together
+
+- `src/core/`: `charset.ts` (Random Groups sets), `chunk.ts` (Custom splitting), `drill.ts` (session totals), `bundled.ts` (word lists and the prefix table), and `generators/words.ts` and `generators/callsigns.ts`. Tests are in `tests/core/practice-generators.test.ts`.
+- `src/features/drill/`: one controller for all four modes, with a store per mode (`drillStores`).
+  - `modes.ts` plans each mode's items.
+  - `practise.ts` holds the entry points from other screens.
+  - `DrillScreen.tsx` and `Setups.tsx` are the UI.
+  - Tests are in `tests/features/drill/`, including a block for the races the reviewer found.
+- `src/features/copy/`: parts shared with Koch (the diff, score metrics, weakest characters, live code), `copy.module.css`, and `weights.ts` (adaptive weights and recency, used the same way by every mode).
+- Settings keys: `groups.*`, `words.*`, `callsigns.*` and `custom.*`.
+- Concurrency follows Koch: each mode has its own epoch.
+  - Every action that awaits audio sets its phase synchronously first, so double clicks can't act on a stale phase.
+  - A pause during a save is applied when the save lands.
+  - `finish()` marks the run `closing`, so a profile reset never closes the session a second time.
 
 ## How Phase 4 is put together
 
@@ -96,11 +124,11 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 
 1. Read `CLAUDE.md`, then this file, then the SPEC section for the next phase.
 2. Ask the owner for the open items above.
-3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 4 commit: 274 TS tests and 8 Rust tests.
+3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 5 commit: 327 TS tests (Rust unchanged since phase 4: 8 tests).
 4. `pnpm tauri dev` runs the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. **Next: phases 5 and 6, back to back.** The owner asked on 2026-10-23 for both to be finished in one go. Present one combined task list, get it approved, then build phase 5, commit, build phase 6, commit.
+5. **Phases 5 and 6, back to back (phase 5 done).** The owner asked on 2026-10-23 for both to be finished in one go. Present one combined task list, get it approved, then build phase 5, commit, build phase 6, commit.
    - **Phase 5 (trimmed, SPEC §15 and §15.1):** Random Groups, Words, Callsigns and Custom Practice.
      - Reuse the copy-mode pieces from phase 4: the diff, results and replay in `KochScreen.tsx` (move them into a shared component), `buildTrialRecord`, and the `epoch`/ticket pattern in `features/koch/controller.ts`.
      - These modes are per item (SPEC §7, "Common pattern"): play, type, submit, with Repeat and Reveal, and a trial written per item. Koch is the only stream mode.
