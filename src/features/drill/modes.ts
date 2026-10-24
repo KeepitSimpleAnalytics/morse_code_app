@@ -9,7 +9,7 @@ import type { Rng } from "../../core/rng";
 import type { SettingsValues } from "../../state/settings-schema";
 import type { Store } from "../../storage/store";
 import { loadWeights } from "../copy/weights";
-import type { DrillItem, DrillMode } from "./store";
+import type { DrillItem, DrillMode, PractiseOverride } from "./store";
 
 /** What each per-item mode plays (SPEC §7.3–7.7). */
 
@@ -23,7 +23,7 @@ export interface PlanInput {
   readonly store: Store;
   readonly profileId: string;
   /** Random Groups: "Practice these characters". */
-  readonly override: readonly string[] | null;
+  readonly override: PractiseOverride | null;
 }
 
 export interface DrillPlan {
@@ -68,12 +68,11 @@ export async function groupChars(
 }
 
 async function planGroups({ v, rng, store, profileId, override }: PlanInput): Promise<DrillPlan> {
-  const chars = override ?? (await groupChars(store, profileId, v));
+  const chars = override?.chars ?? (await groupChars(store, profileId, v));
   if (chars.length < MIN_CHARSET) throw new SetupError("Choose at least two characters.");
+  const weighting = override?.weighting ?? v["groups.weighting"];
   const weights =
-    v["groups.weighting"] === "adaptive"
-      ? await loadWeights(store, profileId, chars, "copy")
-      : undefined;
+    weighting === "adaptive" ? await loadWeights(store, profileId, chars, "copy") : undefined;
   const groups = generateGroups({
     rng,
     allowedChars: chars,
@@ -87,7 +86,7 @@ async function planGroups({ v, rng, store, profileId, override }: PlanInput): Pr
       chars: [...chars],
       source: override ? "practise" : v["groups.source"],
       groupLength: v["groups.length"],
-      weighting: v["groups.weighting"],
+      weighting,
     },
     notice: null,
   };

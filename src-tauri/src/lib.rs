@@ -66,13 +66,21 @@ pub fn run() {
         .expect("error while running Morse Trainer");
 }
 
-fn migrations() -> Vec<Migration> {
-    let list = vec![Migration {
-        version: 1,
-        description: "init",
-        sql: include_str!("../migrations/0001_init.sql"),
-        kind: MigrationKind::Up,
-    }];
+pub(crate) fn migrations() -> Vec<Migration> {
+    let list = vec![
+        Migration {
+            version: 1,
+            description: "init",
+            sql: include_str!("../migrations/0001_init.sql"),
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "char_events_mode",
+            sql: include_str!("../migrations/0002_char_events_mode.sql"),
+            kind: MigrationKind::Up,
+        },
+    ];
     debug_assert_eq!(
         list.last().map(|m| m.version),
         Some(backup::LATEST_MIGRATION)

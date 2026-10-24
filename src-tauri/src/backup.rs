@@ -18,7 +18,7 @@ pub const DB_URL: &str = "sqlite:morse-trainer.db";
 pub const BACKUP_DIR: &str = "backups";
 pub const KEEP_BACKUPS: usize = 14;
 /// Highest migration version this build ships (see `lib.rs`).
-pub const LATEST_MIGRATION: i64 = 1;
+pub const LATEST_MIGRATION: i64 = 2;
 
 const RESTORE_PENDING: &str = "morse-trainer.db.restore";
 const PREFIX: &str = "morse-trainer-";
@@ -311,19 +311,20 @@ mod tests {
             .connect()
             .await
             .unwrap();
-        sqlx::raw_sql(include_str!("../migrations/0001_init.sql"))
-            .execute(&mut conn)
-            .await
-            .unwrap();
+        // The full schema the app ships, so the recorded version below is true.
+        for m in crate::migrations() {
+            sqlx::raw_sql(m.sql).execute(&mut conn).await.unwrap();
+        }
         sqlx::query("INSERT INTO profiles VALUES ('p1', 'Ann', '#fff', 1, 1)")
             .execute(&mut conn)
             .await
             .unwrap();
         if with_migration {
-            sqlx::raw_sql(
+            // Up to date, so only the daily rule decides whether to back up.
+            sqlx::raw_sql(&format!(
                 "CREATE TABLE _sqlx_migrations (version BIGINT PRIMARY KEY, success BOOLEAN);
-                 INSERT INTO _sqlx_migrations VALUES (1, 1);",
-            )
+                 INSERT INTO _sqlx_migrations VALUES ({LATEST_MIGRATION}, 1);"
+            ))
             .execute(&mut conn)
             .await
             .unwrap();

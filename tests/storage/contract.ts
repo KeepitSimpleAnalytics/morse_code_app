@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildTrialRecord, type TrialInput } from "../../src/storage/records";
 import type { Profile, Snippet } from "../../src/storage/schemas";
-import type { NewSession, Store } from "../../src/storage/store";
+import { StoreError, type NewSession, type Store } from "../../src/storage/store";
 
 /**
  * The storage contract (SPEC §14.1): MemoryStore and SqliteStore run this same
@@ -321,6 +321,67 @@ export function storeContract(name: string, make: () => Store): void {
         expect(icr.map((e) => e.responseMs)).toEqual([400, 700]);
         expect(await store.queryCharEvents("a", { mode: "icr", limit: 1 })).toHaveLength(1);
         expect(await store.queryCharEvents("a", { ch: "Q" })).toEqual([]);
+      });
+
+      it("a limit keeps the newest rows, and breaks ties on ts by insertion order", async () => {
+        await store.createProfile(profile("a"));
+        await store.startSession(session("s", "a"));
+        await store.recordTrial(trial("s", "a", "K", "K", { at: T0 + 1000 }));
+        await store.recordTrial(trial("s", "a", "M", "M", { at: T0 + 2000 }));
+        await store.recordTrial(trial("s", "a", "R", "R", { at: T0 + 2000 })); // same ts as M
+        await store.recordTrial(trial("s", "a", "S", "S", { at: T0 + 500 }));
+
+        const two = await store.queryCharEvents("a", { limit: 2 });
+        expect(two.map((e) => e.ch)).toEqual(["R", "M"]);
+        expect((await store.queryCharEvents("a", {})).map((e) => e.ch)).toEqual([
+          "R",
+          "M",
+          "K",
+          "S",
+        ]);
+        expect(await store.queryCharEvents("a", { limit: 0 })).toEqual([]);
+      });
+
+      it("rejects a negative or fractional limit", async () => {
+        await store.createProfile(profile("a"));
+        await expect(store.queryCharEvents("a", { limit: -1 })).rejects.toThrow(StoreError);
+        await expect(store.queryCharEvents("a", { limit: 1.5 })).rejects.toThrow(StoreError);
+      });
+
+      it("counts one character's outcomes by what was typed", async () => {
+        await store.createProfile(profile("a"));
+        await store.createProfile(profile("b"));
+        await store.startSession(session("s", "a"));
+        await store.startSession(session("sb", "b"));
+        for (const typed of ["S", "S", "5", "", "R", "R", "R"]) {
+          await store.recordTrial(trial("s", "a", "R", typed));
+        }
+        await store.recordTrial(trial("sb", "b", "R", "S"));
+
+        expect(await store.countCharOutcomes("a", "R")).toEqual([
+          { outcome: "correct", typed: null, count: 3 },
+          { outcome: "missed", typed: null, count: 1 },
+          { outcome: "substituted", typed: "5", count: 1 },
+          { outcome: "substituted", typed: "S", count: 2 },
+        ]);
+        expect(await store.countCharOutcomes("a", "Q")).toEqual([]);
+      });
+
+      it("orders a null typed value before an empty one, as SQLite does", async () => {
+        await store.createProfile(profile("a"));
+        await store.startSession(session("s", "a"));
+        // An imported file may hold "" where scoring writes null.
+        const empty = trial("s", "a", "R", "S");
+        const typedEmpty = {
+          ...empty,
+          events: empty.events.map((e) => ({ ...e, outcome: "missed" as const, typed: "" })),
+        };
+        await store.recordTrial(typedEmpty);
+        await store.recordTrial(trial("s", "a", "R", ""));
+        expect(await store.countCharOutcomes("a", "R")).toEqual([
+          { outcome: "missed", typed: null, count: 1 },
+          { outcome: "missed", typed: "", count: 1 },
+        ]);
       });
     });
 

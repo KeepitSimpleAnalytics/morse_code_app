@@ -3,6 +3,7 @@ import type { ScoreTotals } from "../../core/drill";
 import type { CharSummary } from "../../core/lesson";
 import type { TrialScore } from "../../core/scoring";
 import type { Timing } from "../../core/timing";
+import type { Weighting } from "../../state/settings-schema";
 
 /**
  * State for the per-item copy modes (SPEC §7.3–7.7). Each mode has its own store,
@@ -13,6 +14,13 @@ import type { Timing } from "../../core/timing";
 
 export const DRILL_MODES = ["groups", "words", "callsigns", "custom"] as const;
 export type DrillMode = (typeof DRILL_MODES)[number];
+
+/** Random Groups' "Practice these characters": used instead of the saved set. */
+export interface PractiseOverride {
+  readonly chars: readonly string[];
+  /** Weighting for this practice, or null to follow `groups.weighting`. */
+  readonly weighting: Weighting | null;
+}
 
 export function isDrillMode(id: string): id is DrillMode {
   return (DRILL_MODES as readonly string[]).includes(id);
@@ -92,7 +100,7 @@ export interface DrillState {
    * Random Groups only: characters from "Practice these characters". Used
    * instead of the saved character set until cleared; never saved.
    */
-  override: readonly string[] | null;
+  override: PractiseOverride | null;
   error: string | null;
   notice: string | null;
 

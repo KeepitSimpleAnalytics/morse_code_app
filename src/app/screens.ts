@@ -24,10 +24,6 @@ export interface ScreenDef {
   /** Page heading. */
   title: string;
   icon: LucideIcon;
-  /** SPEC §15 phase that delivers the screen. */
-  phase: number;
-  summary: string;
-  highlights: readonly [string, string, string];
 }
 
 // Sidebar order and grouping follow SPEC §10.1, minus QSO and Sending (dropped, §15.1).
@@ -38,14 +34,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Koch",
     title: "Koch Lessons",
     icon: BookOpenText,
-    phase: 4,
-    summary:
-      "Learn two characters at full speed, then add one at a time. Lessons are timed and scored character by character, and you advance when you pass.",
-    highlights: [
-      "LCWO, G4FON and Classic (v1) orders",
-      "Copy-as-you-go lessons with an aligned diff",
-      "Each new character introduced by sound and rhythm",
-    ],
   },
   {
     id: "icr",
@@ -53,14 +41,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Instant Recognition",
     title: "Instant Character Recognition",
     icon: Zap,
-    phase: 6,
-    summary:
-      "One character, one keypress, no thinking. Builds the reflex that turns sound straight into letters.",
-    highlights: [
-      "Response-time tracking per character",
-      "Adaptive timeout that follows your median",
-      "Weak characters come back more often",
-    ],
   },
   {
     id: "groups",
@@ -68,14 +48,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Random Groups",
     title: "Random Groups",
     icon: Shuffle,
-    phase: 5,
-    summary:
-      "Random groups from any character set: letters, digits, punctuation, prosigns or your own.",
-    highlights: [
-      "Pick the characters and the group length",
-      "Limit to your learned Koch characters",
-      "Uniform or adaptive weighting",
-    ],
   },
   {
     id: "words",
@@ -83,14 +55,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Words",
     title: "Words",
     icon: TypeOutline,
-    phase: 5,
-    summary:
-      "v1's common words, CW abbreviations and Q-codes, each with its meaning shown after you answer.",
-    highlights: [
-      "The 40 common words from v1",
-      "80+ CW abbreviations and 40+ Q-codes",
-      "Use only words made of learned characters",
-    ],
   },
   {
     id: "callsigns",
@@ -98,9 +62,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Callsigns",
     title: "Callsigns",
     icon: RadioTower,
-    phase: 5,
-    summary: "Realistic callsigns from around the world, or US calls only as in v1.",
-    highlights: ["150+ weighted prefixes", "1×1 to 2×3 formats", "A US-only option"],
   },
   {
     id: "custom",
@@ -108,14 +69,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Custom",
     title: "Custom Practice",
     icon: NotebookPen,
-    phase: 5,
-    summary:
-      "Practise with your own text: paste it in and copy it back, a line or a few words at a time.",
-    highlights: [
-      "Split by line or every N words",
-      "Played in order, one item at a time",
-      "Scored character by character",
-    ],
   },
   {
     id: "player",
@@ -123,14 +76,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Text Player",
     title: "Text Player",
     icon: AudioWaveform,
-    phase: 2,
-    summary:
-      "Type anything and hear it in Morse. The character that's sounding is highlighted in both the text and the code.",
-    highlights: [
-      "Play from the cursor, loop, type-to-transmit",
-      "Reverse-decode pasted dots and dashes",
-      "Export the audio as a WAV file",
-    ],
   },
   {
     id: "stats",
@@ -138,14 +83,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Stats",
     title: "Stats",
     icon: ChartColumn,
-    phase: 7,
-    summary:
-      "See every character you've learned: what you hear well, what you mix up, and your past sessions.",
-    highlights: [
-      "Character grid with what each one is confused with",
-      "Session history with scores",
-      "Practise your weakest characters in one click",
-    ],
   },
   {
     id: "settings",
@@ -153,14 +90,6 @@ export const SCREENS: readonly ScreenDef[] = [
     label: "Settings",
     title: "Settings",
     icon: Settings,
-    phase: 3,
-    summary:
-      "Timing, audio, display, learning and data. Progress is saved locally and backed up daily.",
-    highlights: [
-      "Character and Farnsworth speed, kept linked",
-      "Export, import and restore from backup",
-      "Import your v1 progress",
-    ],
   },
 ];
 

@@ -122,7 +122,7 @@ export function GroupsSetup() {
 
   const custom = parseCustomCharset(v["groups.custom"]);
   const chars: readonly string[] | null =
-    override ??
+    override?.chars ??
     (v["groups.source"] === "classes"
       ? charsetFromClasses({
           letters: v["groups.letters"],
@@ -153,7 +153,7 @@ export function GroupsSetup() {
         {override ? (
           <div className={styles.override}>
             <span>
-              Practising <strong className={styles.preview}>{override.join(" ")}</strong>
+              Practising <strong className={styles.preview}>{override.chars.join(" ")}</strong>
             </span>
             <Button
               size="sm"
@@ -226,17 +226,23 @@ export function GroupsSetup() {
           }}
         />
         <span className={ui.label}>Weighting</span>
-        <Segmented<Weighting>
-          label="Weighting"
-          value={v["groups.weighting"]}
-          options={[
-            { value: "adaptive", label: "Adaptive", title: "Weak characters come up more often" },
-            { value: "uniform", label: "Uniform" },
-          ]}
-          onChange={(x) => {
-            set("groups.weighting", x);
-          }}
-        />
+        {override?.weighting ? (
+          <span className={ui.muted}>
+            {override.weighting === "adaptive" ? "Adaptive" : "Uniform"}, for this practice
+          </span>
+        ) : (
+          <Segmented<Weighting>
+            label="Weighting"
+            value={v["groups.weighting"]}
+            options={[
+              { value: "adaptive", label: "Adaptive", title: "Weak characters come up more often" },
+              { value: "uniform", label: "Uniform" },
+            ]}
+            onChange={(x) => {
+              set("groups.weighting", x);
+            }}
+          />
+        )}
       </div>
     </SetupCard>
   );

@@ -220,6 +220,24 @@ describe("modes", () => {
     expect(s().override).toBeNull();
   });
 
+  it("a practice can force adaptive weighting over a saved Uniform", async () => {
+    useSettings.getState().set("groups.weighting", "uniform");
+    const weightings = async () =>
+      (await store.listSessions(requireProfile().id))
+        .map((x) => (x.settingsSnapshot as { weighting?: string }).weighting)
+        .sort();
+    practiseChars(["H", "5"], "adaptive");
+    await drill.start("groups");
+    expect(await weightings()).toEqual(["adaptive"]);
+    await drill.stop("groups");
+    // A practice without one follows the saved setting.
+    practiseChars(["H", "5"]);
+    await drill.start("groups");
+    expect(await weightings()).toEqual(["adaptive", "uniform"]);
+    await drill.stop("groups");
+    expect(useSettings.getState().values["groups.weighting"]).toBe("uniform");
+  });
+
   it("Words shows meanings and can keep to learned characters", async () => {
     useSettings.getState().set("words.list", "qcodes");
     await drill.start("words");

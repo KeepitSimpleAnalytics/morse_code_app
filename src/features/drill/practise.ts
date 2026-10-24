@@ -1,17 +1,22 @@
 import { useNavStore } from "../../state/nav";
 import { useSettings } from "../../state/settings";
-import { CUSTOM_TEXT_MAX } from "../../state/settings-schema";
+import { CUSTOM_TEXT_MAX, type Weighting } from "../../state/settings-schema";
 import * as drill from "./controller";
 import { drillStores } from "./store";
 
 /** Jumps into a practice mode from elsewhere in the app. */
 
 /**
- * "Practice these characters": Random Groups on just these, until cleared.
- * Refused, with a notice, while a Groups session is under way.
+ * "Practice these characters": Random Groups on just these, until cleared,
+ * with `weighting` in place of the saved one if given (Stats' "Practise my weak
+ * characters" is always adaptive, §7.10). Refused, with a notice, while a
+ * Groups session is under way.
  */
-export function practiseChars(chars: readonly string[]): boolean {
-  const applied = drill.setOverride(chars);
+export function practiseChars(
+  chars: readonly string[],
+  weighting: Weighting | null = null,
+): boolean {
+  const applied = drill.setOverride({ chars, weighting });
   if (!applied) {
     drillStores.groups.getState().set({
       notice: `Finish or stop this Random Groups session first, then practise ${chars.join(" ")} again.`,

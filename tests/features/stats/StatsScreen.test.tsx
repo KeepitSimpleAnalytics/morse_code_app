@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createProfile } from "../../../src/app/session";
 import { openTestProfile } from "../../app/harness";
 import { StatsScreen } from "../../../src/features/stats/StatsScreen";
 import { drillStores } from "../../../src/features/drill/store";
@@ -47,6 +48,10 @@ beforeEach(async () => {
   drillStores.groups.setState({ phase: "idle", override: null });
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("Stats screen", () => {
   it("shows a new profile's empty state", async () => {
     render(<StatsScreen />);
@@ -87,6 +92,56 @@ describe("Stats screen", () => {
 
     await user.click(screen.getByRole("button", { name: "Practise my weak characters" }));
     expect(useNavStore.getState().screen).toBe("groups");
-    expect(drillStores.groups.getState().override?.[0]).toBe("H");
+    expect(drillStores.groups.getState().override).toMatchObject({ weighting: "adaptive" });
+    expect(drillStores.groups.getState().override?.chars[0]).toBe("H");
+  });
+
+  it("drops the open character when the profile changes", async () => {
+    const user = userEvent.setup();
+    await seedSession("koch", [{ prompt: "HKM", response: "SKM" }]);
+    render(<StatsScreen />);
+    await user.click(await screen.findByRole("button", { name: /^H: / }));
+    expect(await screen.findByRole("region", { name: "H" })).toBeInTheDocument();
+
+    await act(async () => {
+      await createProfile("Second", "#10b981");
+    });
+    expect(await screen.findByText("No scored sessions yet.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "H" })).toBeNull();
+  });
+
+  it("shows a failed load, and clears it for the next profile", async () => {
+    vi.spyOn(store, "listSessions").mockRejectedValueOnce(new Error("disk on fire"));
+    render(<StatsScreen />);
+    expect(await screen.findByText(/Loading your stats failed: disk on fire/)).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Overview" })).toBeNull();
+
+    await act(async () => {
+      await createProfile("Second", "#10b981");
+    });
+    expect(await screen.findByText("No scored sessions yet.")).toBeInTheDocument();
+    expect(screen.queryByText(/Loading your stats failed/)).toBeNull();
+  });
+
+  it("takes a character's ICR median over correct answers only", async () => {
+    const user = userEvent.setup();
+    await seedSession("icr", [
+      { prompt: "K", response: "K", responseMs: 400 },
+      { prompt: "K", response: "K", responseMs: 600 },
+      { prompt: "K", response: "M", responseMs: 3000 }, // wrong: left out
+    ]);
+    render(<StatsScreen />);
+    await user.click(await screen.findByRole("button", { name: /^K: / }));
+    const detail = await screen.findByRole("region", { name: "K" });
+    expect(await within(detail).findByText("500 ms")).toBeInTheDocument();
+  });
+
+  it("labels each practised tile with its last-seen date", async () => {
+    await seedSession("koch", [{ prompt: "KM", response: "KM" }]);
+    render(<StatsScreen />);
+    const tile = await screen.findByRole("button", { name: /^K: / });
+    expect(tile).toHaveAccessibleName(
+      new RegExp(`, 1 attempt, last practised ${new Date().toLocaleDateString()}$`),
+    );
   });
 });

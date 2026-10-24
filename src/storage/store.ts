@@ -7,6 +7,7 @@ import type {
   LevelReason,
   Mode,
   Outcome,
+  OutcomeCount,
   Profile,
   ProfileData,
   Session,
@@ -50,7 +51,7 @@ export interface CharEventQuery {
   outcome?: Outcome;
   /** Only events with a response time (ICR). */
   withResponse?: boolean;
-  /** The newest this many. */
+  /** The newest this many: a whole number, 0 or more. */
   limit?: number;
 }
 
@@ -97,6 +98,8 @@ export interface Store {
   listCharEvents(profileId: string): Promise<CharEvent[]>;
   /** Matching events, newest first. */
   queryCharEvents(profileId: string, query: CharEventQuery): Promise<CharEvent[]>;
+  /** One character's events counted by outcome and what was typed, by outcome then typed. */
+  countCharOutcomes(profileId: string, ch: string): Promise<OutcomeCount[]>;
 
   /* char_stats: an incremental cache over char_events (§8.3). */
   getCharStats(profileId: string): Promise<CharStatRow[]>;
@@ -142,4 +145,11 @@ export interface Store {
 
 export class StoreError extends Error {
   override readonly name = "StoreError";
+}
+
+/** Rejects a `CharEventQuery.limit` that isn't a whole number, 0 or more. */
+export function checkLimit(limit: number | undefined): void {
+  if (limit !== undefined && !(Number.isInteger(limit) && limit >= 0)) {
+    throw new StoreError(`limit must be a whole number, 0 or more (got ${limit})`);
+  }
 }

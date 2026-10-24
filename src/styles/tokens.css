@@ -85,6 +85,8 @@
   --color-accent-softer: #fdeee4;
   --color-on-accent: #fffaf5;
   --color-signal: #f06a2f;
+  /* Stats tiles mix the accent in up to this much at 100% accuracy; text stays ≥ 4.6:1. */
+  --tile-mix-max: 80%;
   --color-signal-glow: rgba(240, 106, 47, 0.4);
 
   --color-success: #1f6f4a;
@@ -151,6 +153,8 @@
   --color-accent-softer: rgba(255, 176, 106, 0.07);
   --color-on-accent: #1f1306;
   --color-signal: #ffb06a;
+  /* Stats tiles mix the accent in up to this much at 100% accuracy; text stays ≥ 4.7:1. */
+  --tile-mix-max: 55%;
   --color-signal-glow: rgba(255, 176, 106, 0.55);
 
   --color-success: #7fd6a8;
@@ -217,6 +221,8 @@
   --color-accent-softer: rgba(255, 225, 77, 0.1);
   --color-on-accent: #000000;
   --color-signal: #ffe14d;
+  /* Stats tiles mix the accent in up to this much at 100% accuracy; text stays ≥ 4.9:1. */
+  --tile-mix-max: 60%;
   --color-signal-glow: rgba(255, 225, 77, 0.5);
 
   --color-success: #6dff9e;
@@ -286,6 +292,8 @@
   --color-accent-softer: rgba(255, 74, 58, 0.08);
   --color-on-accent: #0b0101;
   --color-signal: #ff4a3a;
+  /* Stats tiles mix the accent in up to this much at 100% accuracy; text stays ≥ 4.8:1. */
+  --tile-mix-max: 40%;
   --color-signal-glow: rgba(255, 74, 58, 0.5);
 
   --color-success: #ffa597;
@@ -357,6 +365,8 @@
   --color-accent-softer: rgba(57, 255, 122, 0.07);
   --color-on-accent: #001a09;
   --color-signal: #39ff7a;
+  /* Stats tiles mix the accent in up to this much at 100% accuracy; text stays ≥ 4.9:1. */
+  --tile-mix-max: 48%;
   --color-signal-glow: rgba(57, 255, 122, 0.5);
 
   --color-success: #b8ffd2;

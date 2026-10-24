@@ -11,6 +11,18 @@ export function dayStart(ts: number): number {
   return d.getTime();
 }
 
+/**
+ * Local midnight `days` calendar days before the day containing `ts`. Counts
+ * by the calendar, not in 24-hour steps, so a clock change between doesn't
+ * shift it by an hour. `daysBefore(now, 6)` starts "the last 7 days".
+ */
+export function daysBefore(ts: number, days: number): number {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - days);
+  return d.getTime();
+}
+
 export interface SessionTotals {
   readonly startedAt: number;
   readonly activeMs: number;
@@ -47,22 +59,32 @@ export interface Confusion {
   readonly share: number;
 }
 
+export interface OutcomeTally {
+  readonly outcome: "correct" | "substituted" | "missed";
+  readonly typed: string | null;
+  readonly count: number;
+}
+
 /**
  * What a character was heard as, most often first ("You hear H as S 23% of
- * the time"), from its substituted events.
+ * the time"), from its events counted by outcome and what was typed.
  */
-export function confusions(
-  substituted: readonly { readonly typed: string | null }[],
-  attempts: number,
-): Confusion[] {
+export function confusions(tallies: readonly OutcomeTally[], attempts: number): Confusion[] {
   if (attempts <= 0) return [];
   const by = new Map<string, number>();
-  for (const e of substituted) {
-    if (e.typed !== null) by.set(e.typed, (by.get(e.typed) ?? 0) + 1);
+  for (const t of tallies) {
+    if (t.outcome === "substituted" && t.typed !== null) {
+      by.set(t.typed, (by.get(t.typed) ?? 0) + t.count);
+    }
   }
   return [...by.entries()]
     .map(([typed, count]) => ({ typed, count, share: count / attempts }))
     .sort((a, b) => b.count - a.count || (a.typed < b.typed ? -1 : 1));
+}
+
+/** How many times nothing was typed for the character. */
+export function missedCount(tallies: readonly OutcomeTally[]): number {
+  return tallies.reduce((n, t) => (t.outcome === "missed" ? n + t.count : n), 0);
 }
 
 export interface CharAccuracy {

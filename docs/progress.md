@@ -16,7 +16,7 @@ SPEC §15 and what is waiting on whom.
 | 4. Koch, scoring UI, session flow       | Built. Waiting for the owner to run a full lesson in `pnpm tauri dev` (QA 2).                         | see git log      |
 | 5. Other copy modes (trimmed)           | Built. Waiting for the owner to complete and persist a session in each mode in `pnpm tauri dev`.      | see git log      |
 | 6. ICR + adaptive                       | Built. Waiting for the owner to run QA 5 (ICR timing feels immediate, no stutter over 50 characters). | see git log      |
-| 7. Stats dashboard (trimmed)            | Built and committed, but the code review's fixes are still to do (see "Next" below).                  | see git log      |
+| 7. Stats dashboard (trimmed)            | Built, and the code review's 13 fixes are done and re-reviewed.                                       | see git log      |
 | (extra) Themes                          | Done: Dark (default), Light, High contrast, Night red, Green terminal, System default.                | see git log      |
 | 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
 | 9. Realism + extras                     | Dropped, see SPEC §15.1.                                                                              | —                |
@@ -118,6 +118,15 @@ The owner asked me to research and decide these.
   - Tests are in `tests/features/stats/`.
 - `App.tsx` routes screens with an exhaustive switch. The `ScreenIntro` placeholder was deleted, since every screen is built.
 
+## Phase 7 review fixes (my calls)
+
+- "Practise my weak characters" forces Adaptive for that practice only: the override is `{chars, weighting}`, and Random Groups shows "Adaptive, for this practice" in place of the Weighting toggle. The saved `groups.weighting` is untouched. Other "Practice these characters" buttons still follow the saved weighting.
+- Migration `0002` adds `idx_char_events_profile_mode_ts`. An existing database takes a pre-migration backup on its first launch after this (by design). The Node test driver now runs every file in `src-tauri/migrations/`.
+- `Store.countCharOutcomes` (GROUP BY outcome, typed) feeds the character detail. `queryCharEvents` rejects a negative or fractional `limit`.
+- "Last 7 days" counts calendar days (`daysBefore`), so the window is right across a clock change.
+- Character tiles: each theme sets `--tile-mix-max` (light 80%, dark 55%, high contrast 60%, night red 40%, green terminal 48%), the most accent the tile can mix in while its text keeps ≥ 4.5:1 at 100% accuracy. A flat 70% cap failed in four themes. Night red's range is narrow, but the value is printed on every tile.
+- Not changed, on purpose: the open character is remembered per profile, so switching A → B → A shows it again. The per-character median shows "—" while loading and when there is no data.
+
 ## How Phase 6 is put together
 
 - `src/core/icr.ts`:
@@ -195,26 +204,14 @@ The owner asked me to research and decide these.
 
 1. Read `CLAUDE.md`, then this file, then the SPEC section for the next phase.
 2. Ask the owner for the open items above.
-3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the latest commit: 360 TS tests and 8 Rust tests.
+3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the latest commit: 377 TS tests and 8 Rust tests.
    - **pnpm on this PC (2026-10-23):** the corepack shim in `%APPDATA%\npm` is gone, so plain `pnpm` isn't found. Use `corepack pnpm <cmd>`.
    - `pnpm tauri dev` also runs `pnpm dev` itself (beforeDevCommand). For that, put a folder on PATH with a `pnpm.cmd` containing `@echo off` / `corepack pnpm %*`, then run `corepack pnpm tauri dev`. A real fix is to re-run `corepack enable` from an elevated shell, or with `--install-directory` pointing at a folder on PATH.
 4. `pnpm tauri dev` runs the app.
    - Vite hot-reloads while code is being edited. A reload in the middle of a multi-file change can leave the window black ("does not provide an export named …"). Restart the dev app after a batch of edits. It isn't a bug in the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. **Next: the phase 7 code-review fixes, then a commit, then phase 10 (Release).** Phases 5–7 and the themes are committed. The code reviewer's findings on phase 7, most important first:
-   1. "Practise my weak characters" must run with adaptive weighting on (§7.10). At the moment `practiseChars` only overrides the characters, and `planGroups` follows the saved `groups.weighting`. Pass a weighting override as well.
-   2. The ICR median query (`mode = icr`, correct, with a response, newest 200) can't use the only index `(profile_id, ch, ts)`, so it scans every event. Add migration `0002`: `CREATE INDEX idx_char_events_profile_mode_ts ON char_events(profile_id, mode, ts)`. Then check `EXPLAIN QUERY PLAN` in the better-sqlite3 tests.
-   3. In `StatsScreen`, `error` isn't keyed to the profile, so a failed load's banner stays up after a profile switch and hides the busy state. Key it the way `data` is keyed, and also reset `selected` on a profile switch.
-   4. The 7-day window `dayStart(now) - 6 * DAY_MS` is an hour off across a clock change (the UK/EU change is 2026-10-25). Add a core helper that uses `setDate(getDate() - n)` after `setHours(0, 0, 0, 0)`, with a test.
-   5. The per-character "Median response (ICR)" counts wrong answers, but the overview median uses only correct ones. Add `outcome: "correct"` to the per-character query.
-   6. The "last 200" label is hard-coded: use `TARGET_SAMPLE`. `CHAR_RT_SAMPLE` duplicates it.
-   7. Have both stores reject a negative `limit` in `queryCharEvents` (`StoreError`). Add a contract test that `limit` keeps the newest rows, plus one for ties on `ts`.
-   8. Opening a character fetches every substituted and missed row just to count them. Add an aggregate query (GROUP BY outcome, typed), and skip it when the character has no stats.
-   9. The `<span>` captions inside `<dl>` groups are invalid markup: move them into a `<dd>`. Give the loading placeholder visually hidden "Loading your stats…" text.
-   10. Check tile contrast at 100% accuracy in every theme (now five), or cap the colour mix at about 70%.
-   11. Add the last-seen date to the tile label (§7.10 hover).
-   12. `ScreenDef.summary`, `highlights` and `phase` in `src/app/screens.ts` are unused now. Remove them.
-   13. Tests to add: the 7-day boundary and the clock change; `weakForPractice` with more than 6 qualifying characters; StatsScreen across a profile switch and in its error state.
-   - After that, run the full checks and have the code-reviewer agent go over the fixes. Then commit.
-   - Then do phase 10 (SPEC §15): icons, About with the data licences, a README with SmartScreen notes, `release.yml` and the updater. Pushing is blocked until the KeepitSimple SSH key exists (open item 3). The owner also needs to choose signed or unsigned (SPEC §16 Q3). The default is unsigned, and the owner leaned that way for a single learner.
+5. **Next: phase 10 (Release, SPEC §15).**
+   - Icons, About with the data licences, a README with SmartScreen notes, `release.yml` and the updater.
+   - Pushing is blocked until the KeepitSimple SSH key exists (open item 3).
+   - The owner also needs to choose signed or unsigned (SPEC §16 Q3). The default is unsigned, and the owner leaned that way for a single learner.

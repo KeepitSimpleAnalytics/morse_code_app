@@ -89,6 +89,12 @@ export const CharEventSchema = z.object({
 });
 export type CharEvent = z.infer<typeof CharEventSchema>;
 
+/** How often a character came out one way, typed as what (substituted only, else null). */
+export const OutcomeCountSchema = CharEventSchema.pick({ outcome: true, typed: true }).extend({
+  count: z.number().int().positive(),
+});
+export type OutcomeCount = z.infer<typeof OutcomeCountSchema>;
+
 export const CharStatSchema = z.object({
   profileId: id,
   ch: z.string().min(1),

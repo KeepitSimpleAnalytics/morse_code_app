@@ -14,6 +14,7 @@ import {
   type KochLevelHistory,
   type KochProgress,
   type LevelReason,
+  type OutcomeCount,
   type Profile,
   type ProfileData,
   type Session,
@@ -30,7 +31,7 @@ import type {
   Store,
   TrialRecord,
 } from "./store";
-import { StoreError } from "./store";
+import { checkLimit, StoreError } from "./store";
 
 /**
  * In-memory Store for unit tests and `pnpm dev:web` (SPEC §9.3). Nothing is saved;
@@ -253,6 +254,7 @@ export class MemoryStore implements Store {
   }
 
   async queryCharEvents(profileId: string, q: CharEventQuery): Promise<CharEvent[]> {
+    checkLimit(q.limit);
     const list = this.t.charEvents
       .filter(
         (e) =>
@@ -264,6 +266,23 @@ export class MemoryStore implements Store {
       )
       .sort((a, b) => b.ts - a.ts || b.id - a.id);
     return copy(q.limit === undefined ? list : list.slice(0, q.limit));
+  }
+
+  async countCharOutcomes(profileId: string, ch: string): Promise<OutcomeCount[]> {
+    const by = new Map<string, OutcomeCount>();
+    for (const e of this.t.charEvents) {
+      if (e.profileId !== profileId || e.ch !== ch) continue;
+      const key = `${e.outcome}|${e.typed === null ? "" : `=${e.typed}`}`;
+      const row = by.get(key);
+      if (row) row.count++;
+      else by.set(key, { outcome: e.outcome, typed: e.typed, count: 1 });
+    }
+    // SQLite's ORDER BY puts NULL before every string, "" included.
+    const typedOrder = (a: string | null, b: string | null) =>
+      a === null || b === null ? (a === null ? 0 : 1) - (b === null ? 0 : 1) : cmp(a, b);
+    return [...by.values()].sort(
+      (a, b) => cmp(a.outcome, b.outcome) || typedOrder(a.typed, b.typed),
+    );
   }
 
   async getCharStats(profileId: string): Promise<CharStatRow[]> {

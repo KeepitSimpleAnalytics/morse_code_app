@@ -24,6 +24,7 @@ import {
   type DrillMode,
   type DrillSummary,
   type ItemResult,
+  type PractiseOverride,
 } from "./store";
 
 /**
@@ -557,12 +558,12 @@ export function dismissResults(mode: DrillMode): void {
  * Random Groups: "Practice these characters" (null clears it). Refused while a
  * Groups session is under way; returns whether it was applied.
  */
-export function setOverride(chars: readonly string[] | null): boolean {
+export function setOverride(override: PractiseOverride | null): boolean {
   const mode = "groups";
   const phase = state(mode).phase;
   if (phase !== "idle" && phase !== "results") return false;
   dismissResults(mode);
-  state(mode).set({ override: chars, notice: null, error: null });
+  state(mode).set({ override, notice: null, error: null });
   return true;
 }
 

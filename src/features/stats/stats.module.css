@@ -26,6 +26,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+.tile dd.caption {
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
 .of {
   font-size: var(--text-md);
   color: var(--color-text-subtle);
@@ -39,7 +46,11 @@
   list-style: none;
 }
 
-/* One hue, lightness by accuracy: readable for colour-blind users, and the value is printed. */
+/*
+ * One hue, lightness by accuracy: readable for colour-blind users, and the
+ * value is printed. --acc is 0–1; each theme caps the mix (--tile-mix-max) so
+ * the text keeps 4.5:1 even at 100%.
+ */
 .charTile {
   display: flex;
   flex-direction: column;
@@ -48,7 +59,11 @@
   padding: var(--space-2) 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: color-mix(in oklab, var(--color-accent) var(--acc, 0%), var(--color-surface-sunken));
+  background: color-mix(
+    in oklab,
+    var(--color-accent) calc(var(--acc, 0) * var(--tile-mix-max)),
+    var(--color-surface-sunken)
+  );
   color: var(--color-text);
   cursor: pointer;
 }

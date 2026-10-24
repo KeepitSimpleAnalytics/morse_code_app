@@ -3,16 +3,18 @@ import { useEffect, useState } from "react";
 import { Banner, Button } from "../../components/ui";
 import { ALPHABET } from "../../core/alphabet";
 import { kochOrder, maxKochLevel } from "../../core/koch";
+import { median, TARGET_SAMPLE } from "../../core/icr";
 import {
   accuracySince,
   confusions,
+  daysBefore,
   dayStart,
+  missedCount,
   practiceMsSince,
   weakForPractice,
   WEAK_MIN_ATTEMPTS,
   type Confusion,
 } from "../../core/stats";
-import { median } from "../../core/icr";
 import { errorText, requireStore, useApp } from "../../state/app";
 import { useSettings } from "../../state/settings";
 import type { CharStatRow, Mode, Session } from "../../storage/schemas";
@@ -29,10 +31,7 @@ import styles from "./stats.module.css";
  * weak characters".
  */
 
-const DAY_MS = 86_400_000;
 const HISTORY_PAGE = 20;
-/** Most recent ICR answers a character's median response time is taken over. */
-const CHAR_RT_SAMPLE = 200;
 
 const MODE_LABEL: Record<Mode, string> = {
   koch: "Koch lesson",
@@ -64,9 +63,11 @@ interface Overview {
 export function StatsScreen() {
   const profileId = useApp((s) => s.current?.id);
   const orderId = useSettings((s) => s.values["learning.kochOrder"]);
+  // Each is tagged with what it was loaded for, so nothing from the last
+  // profile (or Koch order) shows after a switch.
   const [data, setData] = useState<{ key: string; overview: Overview } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [failed, setFailed] = useState<{ key: string; message: string } | null>(null);
+  const [picked, setPicked] = useState<{ profileId: string; ch: string } | null>(null);
   const key = `${profileId ?? ""}|${orderId}`;
 
   useEffect(() => {
@@ -92,11 +93,11 @@ export function StatsScreen() {
       (overview) => {
         if (live) {
           setData({ key, overview });
-          setError(null);
+          setFailed(null);
         }
       },
       (err: unknown) => {
-        if (live) setError(`Loading your stats failed: ${errorText(err)}`);
+        if (live) setFailed({ key, message: `Loading your stats failed: ${errorText(err)}` });
       },
     );
     return () => {
@@ -105,6 +106,11 @@ export function StatsScreen() {
   }, [key, profileId]);
 
   const overview = data?.key === key ? data.overview : null;
+  const error = failed?.key === key ? failed.message : null;
+  const selected = picked && picked.profileId === profileId ? picked.ch : null;
+  const setSelected = (ch: string | null) => {
+    setPicked(ch && profileId ? { profileId, ch } : null);
+  };
 
   return (
     <div className={ui.page}>
@@ -114,7 +120,11 @@ export function StatsScreen() {
       </header>
       {error && <Banner tone="danger">{error}</Banner>}
       {!overview ? (
-        !error && <div className={ui.card} aria-busy="true" />
+        !error && (
+          <div className={ui.card} aria-busy="true">
+            <span className={ui.srOnly}>Loading your stats…</span>
+          </div>
+        )
       ) : (
         <>
           <OverviewTiles o={overview} />
@@ -139,7 +149,7 @@ export function StatsScreen() {
 function OverviewTiles({ o }: { o: Overview }) {
   const now = o.loadedAt;
   const today = practiceMsSince(o.sessions, dayStart(now));
-  const week = accuracySince(o.sessions, dayStart(now) - 6 * DAY_MS);
+  const week = accuracySince(o.sessions, daysBefore(now, 6));
   const weak = weakForPractice(o.stats, o.learned);
   return (
     <section className={ui.card} aria-labelledby="stats-overview">
@@ -152,7 +162,7 @@ function OverviewTiles({ o }: { o: Overview }) {
           <dd>
             {o.kochLevel} <span className={styles.of}>of {o.kochMax}</span>
           </dd>
-          <span className={ui.muted}>{o.kochOrderName} order</span>
+          <dd className={styles.caption}>{o.kochOrderName} order</dd>
         </div>
         <div className={styles.tile}>
           <dt>Accuracy, last 7 days</dt>
@@ -165,7 +175,7 @@ function OverviewTiles({ o }: { o: Overview }) {
         <div className={styles.tile}>
           <dt>Instant Recognition median</dt>
           <dd>{o.icrMedianMs === null ? "—" : `${Math.round(o.icrMedianMs)} ms`}</dd>
-          <span className={ui.muted}>over your last 200 correct answers</span>
+          <dd className={styles.caption}>over your last {TARGET_SAMPLE} correct answers</dd>
         </div>
       </dl>
       <div className={ui.startRow}>
@@ -174,7 +184,7 @@ function OverviewTiles({ o }: { o: Overview }) {
           icon={Shuffle}
           disabled={weak.length < 2}
           onClick={() => {
-            practiseChars(weak);
+            practiseChars(weak, "adaptive");
           }}
         >
           Practise my weak characters
@@ -216,7 +226,7 @@ function CharGrid({
         {chars.map((ch) => {
           const stat = byCh.get(ch);
           const label = stat
-            ? `${ch}: ${pct(stat.ewmaAcc)} recent accuracy, ${stat.attempts} attempts`
+            ? `${ch}: ${pct(stat.ewmaAcc)} recent accuracy, ${stat.attempts} ${stat.attempts === 1 ? "attempt" : "attempts"}, last practised ${new Date(stat.lastSeen).toLocaleDateString()}`
             : `${ch}: not practised yet`;
           return (
             <li key={ch}>
@@ -224,9 +234,7 @@ function CharGrid({
                 type="button"
                 className={[styles.charTile, stat ? "" : styles.unseen].join(" ")}
                 style={
-                  stat
-                    ? ({ "--acc": `${Math.round(stat.ewmaAcc * 100)}%` } as React.CSSProperties)
-                    : undefined
+                  stat ? ({ "--acc": stat.ewmaAcc.toFixed(2) } as React.CSSProperties) : undefined
                 }
                 aria-pressed={selected === ch}
                 aria-label={label}
@@ -262,24 +270,27 @@ function CharDetail({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const attempts = stat?.attempts ?? 0;
   useEffect(() => {
     let live = true;
+    if (attempts === 0) return;
     const db = requireStore();
     Promise.all([
-      db.queryCharEvents(profileId, { ch, outcome: "substituted" }),
-      db.queryCharEvents(profileId, { ch, outcome: "missed" }),
+      db.countCharOutcomes(profileId, ch),
+      // The same sample as the overview median: correct answers only.
       db.queryCharEvents(profileId, {
         ch,
         mode: "icr",
+        outcome: "correct",
         withResponse: true,
-        limit: CHAR_RT_SAMPLE,
+        limit: TARGET_SAMPLE,
       }),
     ]).then(
-      ([subs, missed, timed]) => {
+      ([tallies, timed]) => {
         if (!live) return;
         setDetail({
-          confused: confusions(subs, stat?.attempts ?? 0),
-          missed: missed.length,
+          confused: confusions(tallies, attempts),
+          missed: missedCount(tallies),
           rtMs: timed.length > 0 ? median(timed.map((e) => e.responseMs as number)) : null,
         });
       },
@@ -290,7 +301,7 @@ function CharDetail({
     return () => {
       live = false;
     };
-  }, [profileId, ch, stat?.attempts]);
+  }, [profileId, ch, attempts]);
 
   return (
     <section className={ui.card} aria-labelledby="stats-char" aria-live="polite">

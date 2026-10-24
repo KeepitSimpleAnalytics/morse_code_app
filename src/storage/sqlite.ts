@@ -5,6 +5,7 @@ import {
   CharStatSchema,
   KochLevelHistorySchema,
   KochProgressSchema,
+  OutcomeCountSchema,
   ProfileSchema,
   SessionSchema,
   SnippetSchema,
@@ -16,6 +17,7 @@ import {
   type KochLevelHistory,
   type KochProgress,
   type LevelReason,
+  type OutcomeCount,
   type Profile,
   type ProfileData,
   type Session,
@@ -33,7 +35,7 @@ import type {
   Store,
   TrialRecord,
 } from "./store";
-import { StoreError } from "./store";
+import { checkLimit, StoreError } from "./store";
 import type { z } from "zod";
 
 type Row = Record<string, unknown>;
@@ -620,6 +622,7 @@ export class SqliteStore implements Store {
   }
 
   async queryCharEvents(profileId: string, q: CharEventQuery): Promise<CharEvent[]> {
+    checkLimit(q.limit);
     const where = ["profile_id = ?"];
     const params: SqlValue[] = [profileId];
     if (q.ch !== undefined) {
@@ -641,6 +644,15 @@ export class SqliteStore implements Store {
       params.push(q.limit);
     }
     return await this.rows(eventFrom, sql, params);
+  }
+
+  async countCharOutcomes(profileId: string, ch: string): Promise<OutcomeCount[]> {
+    return await this.rows(
+      (r) => parse(OutcomeCountSchema, r, "outcome count"),
+      `SELECT outcome, typed, COUNT(*) AS count FROM char_events
+        WHERE profile_id = ? AND ch = ? GROUP BY outcome, typed ORDER BY outcome, typed`,
+      [profileId, ch],
+    );
   }
 
   async getCharStats(profileId: string): Promise<CharStatRow[]> {

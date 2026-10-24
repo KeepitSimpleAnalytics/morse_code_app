@@ -79,11 +79,14 @@ describe("drill screens", () => {
 
   it("Random Groups shows the practice override and clears it", async () => {
     const user = userEvent.setup();
-    drill.setOverride(["H", "5"]);
+    drill.setOverride({ chars: ["H", "5"], weighting: "adaptive" });
     render(<DrillScreen mode="groups" />);
     expect(screen.getByText("H 5")).toBeInTheDocument();
+    expect(screen.getByText("Adaptive, for this practice")).toBeInTheDocument();
+    expect(screen.queryByRole("radiogroup", { name: "Weighting" })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Use my character set" }));
     expect(screen.getByRole("radiogroup", { name: "Character source" })).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "Weighting" })).toBeInTheDocument();
   });
 
   it("Random Groups disables Start with fewer than two characters", async () => {
