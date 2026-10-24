@@ -3,13 +3,17 @@ import {
   BookOpen,
   Database,
   Gauge,
+  ExternalLink,
   Info,
+  Scale,
   MonitorCog,
   Timer,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { APP_VERSION, RELEASES_URL, REPO_URL } from "../../app/version";
 import { audioEngine, LATENCY_WARN_MS, type LatencyReport } from "../../audio/engine";
 import { Segmented, Slider, Toggle } from "../../components/controls";
 import { ThemeSwitch } from "../../components/shell/ThemeSwitch";
@@ -26,10 +30,11 @@ import {
   withEffWpm,
 } from "../../core/speed";
 import { WORD_SPACING_MAX, WORD_SPACING_MIN } from "../../core/timing";
-import { errorText } from "../../state/app";
+import { addNotice, errorText } from "../../state/app";
 import { useSettings } from "../../state/settings";
 import type { Advancement, ShowCode } from "../../state/settings-schema";
 import { HowToLearnCards } from "../onboarding/Onboarding";
+import { LicencesDialog } from "./LicencesDialog";
 import { DataSection } from "./DataSection";
 import { ProfileSection } from "./ProfileSection";
 import styles from "./Settings.module.css";
@@ -428,11 +433,18 @@ function LearningSection() {
   );
 }
 
+function openLink(url: string): void {
+  openUrl(url).catch((err: unknown) => {
+    addNotice("danger", `Opening ${url} failed: ${errorText(err)}`);
+  });
+}
+
 function AboutSection() {
   const [cards, setCards] = useState(false);
+  const [licences, setLicences] = useState(false);
   return (
     <Section id="about" title="About">
-      <Row label="Morse Trainer" hint="Version 2.0.0 · Keep It Simple Analytics">
+      <Row label="Morse Trainer" hint={`Version ${APP_VERSION} · Keep It Simple Analytics`}>
         <Button
           size="sm"
           icon={BookOpen}
@@ -443,10 +455,48 @@ function AboutSection() {
           How to learn
         </Button>
       </Row>
-      <p className={styles.small}>
-        Bundled data (Koch orders) and its sources are listed in the app's data README. Licences for
-        libraries and word lists are added with the release.
-      </p>
+      <Row
+        label="New versions"
+        hint="There's no automatic update yet. Download the newest installer from the releases page; it keeps your progress."
+      >
+        <Button
+          size="sm"
+          icon={ExternalLink}
+          onClick={() => {
+            openLink(RELEASES_URL);
+          }}
+        >
+          Releases
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={ExternalLink}
+          onClick={() => {
+            openLink(REPO_URL);
+          }}
+        >
+          Source code
+        </Button>
+      </Row>
+      <Row label="Licences" hint="MIT licence, plus the sources of the bundled data and libraries">
+        <Button
+          size="sm"
+          icon={Scale}
+          onClick={() => {
+            setLicences(true);
+          }}
+        >
+          Licences
+        </Button>
+      </Row>
+      {licences && (
+        <LicencesDialog
+          onClose={() => {
+            setLicences(false);
+          }}
+        />
+      )}
       {cards && (
         <Dialog
           title="How to learn"

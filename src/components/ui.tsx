@@ -90,7 +90,7 @@ interface DialogProps {
 }
 
 const FOCUSABLE =
-  'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
 
 /** A modal dialog: focus moves in and is trapped, Esc closes, focus returns on close. */
 export function Dialog({ title, onClose, children, actions, tone = "default", wide }: DialogProps) {

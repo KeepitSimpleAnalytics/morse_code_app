@@ -1,6 +1,6 @@
 # Progress and handoff notes
 
-Last updated 2026-10-23. Work happens on branch `v2`; nothing has been pushed yet.
+Last updated 2026-10-24. Work happens on branch `v2`; nothing has been pushed yet.
 `SPEC.md` is the source of truth. This file records where the build stands against
 SPEC §15 and what is waiting on whom.
 
@@ -20,7 +20,7 @@ SPEC §15 and what is waiting on whom.
 | (extra) Themes                          | Done: Dark (default), Light, High contrast, Night red, Green terminal, System default.                | see git log      |
 | 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
 | 9. Realism + extras                     | Dropped, see SPEC §15.1.                                                                              | —                |
-| 10. Release                             | Not started. Follows phase 7.                                                                         | —                |
+| 10. Release                             | Built. The tag → draft-release run and the Windows QA checklist wait on pushing (open item 3).        | see git log      |
 
 ## Scope cut (2026-10-23)
 
@@ -39,7 +39,7 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
    - **Item 12:** minimize mid-lesson. The lesson pauses, and the hidden time isn't counted.
    - Phase 3 items 3 and 7 were skipped by the owner and are still worth doing once before release.
 2. **Latency retest:** wired headphones on the Realtek analog jack. This is now low priority. The 40 ms limit only matters for sending sidetone, and sending practice (phase 8) has been dropped.
-3. **Push and CI:** pushes must go out as the KeepitSimple GitHub account, never robabrown. This PC has no KeepitSimple SSH key yet, so ask the owner how to set one up. CI has never run.
+3. **Push, CI and the first release:** pushes must go out as the KeepitSimple GitHub account, never robabrown. This PC has no KeepitSimple SSH key yet, so ask the owner how to set one up. CI has never run, and neither has `release.yml`. The first release then follows `docs/release.md`: switch Actions to read/write, tag, run the QA checklist on the draft's installer, publish.
 
 ## Decisions made so far (not yet revisited by the owner)
 
@@ -117,6 +117,34 @@ The owner asked me to research and decide these.
   - Session history in pages of 20.
   - Tests are in `tests/features/stats/`.
 - `App.tsx` routes screens with an exhaustive switch. The `ScreenIntro` placeholder was deleted, since every screen is built.
+
+## Phase 10 (2026-10-24)
+
+- **Owner decisions:**
+  - The installer ships unsigned.
+  - The app is MIT (`LICENSE`, © 2026 Keep It Simple Analytics).
+  - The updater and the update check are deferred (SPEC §15.1). `docs/release.md` lists the wiring it would need.
+- **Icons** were already generated in phase 0 from `design/icon.svg`.
+- **About:**
+  - It links to the releases page and the source code. The opener capability allows exactly those two URLs.
+  - It shows `APP_VERSION`. `tests/app/version.test.ts` now checks Cargo.toml too.
+  - A Licences dialog (`src/features/settings/LicencesDialog.tsx`) shows the MIT text, each bundled data file's own `source`/`license` fields, and every third-party package with its licence text, behind a filter.
+- **Licence list:**
+  - `pnpm licenses:gen` (`scripts/licenses.mjs`) writes `src/data/third-party-licenses.json`.
+  - Sources: the npm production packages, plus the Rust crates linked on Windows and both macOS targets (normal and build dependencies from the root). Each distinct text is stored once.
+  - The file is about 1.7 MB, loaded only when the dialog opens.
+  - It records a hash of both lockfiles, and `tests/data/licenses.test.ts` fails when that hash is stale.
+  - 19 crates publish no licence file: `objc2-*`, `webview2-com*`, `selectors`, `tauri-plugin`, `crc-catalog`, `alloc-stdlib`, `dispatch2` and `block2`. Their repositories' licence files are kept in `scripts/licence-texts/<owner>__<repo>.txt`, each headed with where it came from. Stylo, the repository `selectors` comes from, has no file at all, so it gets the canonical MPL-2.0 text plus a note of where the source is. The generator fails if any package is still left without a text.
+  - `scripts/licenses-hash.mjs` hashes the lockfiles, the generator and `scripts/licence-texts/`. The script records the hash, and the test checks it.
+- **`release.yml`:**
+  - Triggered by a `v*` tag.
+  - A first job on Windows refuses a tag that doesn't match the app version, runs CI's full gate, and creates the draft (or reuses one on a re-run). The notes come from `.github/release-notes.md`.
+  - The two build jobs then upload to that one draft by `releaseId`, using `tauri-apps/tauri-action@v1`: the NSIS installer on Windows, and a universal `.dmg` on macOS (best-effort, ad-hoc signed with `signingIdentity: "-"`).
+  - There is no manual trigger, because one would tag whatever commit it ran on.
+  - `ci.yml` now asks for a read-only token.
+- **Uninstaller:** Tauri's NSIS uninstaller has a "Delete the application data" checkbox, unchecked by default, which matches SPEC §11. Nothing was changed.
+- **README:** rewritten for users: install, the SmartScreen steps, data, uninstalling, licence. The developer notes are at the end.
+  - SPEC §13 asks for a SmartScreen screenshot. It isn't in yet, because I can't capture one. The owner can add one from the first real install.
 
 ## Phase 7 review fixes (my calls)
 
@@ -211,7 +239,4 @@ The owner asked me to research and decide these.
    - Vite hot-reloads while code is being edited. A reload in the middle of a multi-file change can leave the window black ("does not provide an export named …"). Restart the dev app after a batch of edits. It isn't a bug in the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. **Next: phase 10 (Release, SPEC §15).**
-   - Icons, About with the data licences, a README with SmartScreen notes, `release.yml` and the updater.
-   - Pushing is blocked until the KeepitSimple SSH key exists (open item 3).
-   - The owner also needs to choose signed or unsigned (SPEC §16 Q3). The default is unsigned, and the owner leaned that way for a single learner.
+5. **Next:** every phase in scope is built. What's left is the owner's QA (open item 1) and pushing plus the first release (open item 3). The updater, code signing and everything in SPEC §15.1 wait until the owner asks for them.

@@ -6,6 +6,7 @@ authors = ["Keep It Simple Analytics"]
 edition = "2024"
 rust-version = "1.90"
 publish = false
+license = "MIT"
 
 [lib]
 # The `_lib` suffix keeps the lib name distinct from the bin name (cargo#8519, Windows).

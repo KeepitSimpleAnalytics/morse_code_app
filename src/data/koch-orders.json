@@ -1,8 +1,8 @@
 {
   "id": "koch-orders",
   "name": "Koch character orders",
-  "source": "See src/data/README.md for per-order sources and verification",
-  "license": "Factual sequences (not copyrightable); sources credited in README.md",
+  "source": "LCWO, by Fabian Kurz DJ1YFK; the sequence in Dave Finley N1IRZ's Koch method article, which G4FON follows; and Morse Trainer v1",
+  "license": "Character sequences are facts, not copyrightable; the sources are credited here",
   "items": [
     {
       "id": "lcwo",

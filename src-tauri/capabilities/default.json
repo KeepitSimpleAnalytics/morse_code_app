@@ -29,6 +29,13 @@
     "core:window:allow-destroy",
     "process:allow-restart",
     {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://github.com/KeepitSimpleAnalytics/morse_code_app" },
+        { "url": "https://github.com/KeepitSimpleAnalytics/morse_code_app/releases" }
+      ]
+    },
+    {
       "identifier": "opener:allow-reveal-item-in-dir",
       "allow": [{ "path": "$APPDATA/**/*" }, { "path": "$APPCONFIG/**/*" }]
     }

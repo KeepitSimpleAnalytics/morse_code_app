@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "../../src/App";
+import { APP_VERSION } from "../../src/app/version";
 import { boot } from "../../src/app/boot";
 import { resetProgress, runImport, runV1Import, planV1 } from "../../src/app/data-actions";
 import { activateProfile, createProfile, switchProfile } from "../../src/app/session";
@@ -117,6 +118,23 @@ describe("settings are saved per profile", () => {
 });
 
 describe("Settings screen", () => {
+  it("About shows the version and opens the licences", async () => {
+    const user = userEvent.setup();
+    await openTestProfile();
+    useNavStore.getState().go("settings");
+    render(<App />);
+    const about = screen.getByRole("region", { name: "About" });
+    expect(within(about).getByText(`Version ${APP_VERSION}`, { exact: false })).toBeInTheDocument();
+    await user.click(within(about).getByRole("button", { name: "Licences" }));
+    const dialog = await screen.findByRole("dialog", { name: "Licences" });
+    expect(within(dialog).getByText("Released under the MIT licence.")).toBeInTheDocument();
+    expect(within(dialog).getByText(/^Callsign prefixes/)).toBeInTheDocument();
+    expect(await within(dialog).findByText(/open-source packages/)).toBeInTheDocument();
+    await user.type(within(dialog).getByLabelText("Filter"), "zustand");
+    expect(within(dialog).getByText("zustand")).toBeInTheDocument();
+    expect(within(dialog).queryByText("react-dom")).toBeNull();
+  });
+
   it("edits training speed, which the top-bar chip reflects", async () => {
     await openTestProfile();
     useNavStore.getState().go("settings");

@@ -748,7 +748,7 @@ Each phase ends with its tests green, the app runnable through `pnpm tauri dev` 
 | **5. Other copy modes (trimmed)** | Random Groups: character set (letters, digits, punctuation, prosigns, custom string or Koch learned) and a fixed group length. Words: the bundled `v1-common`, `qcodes` and `cw-abbrev` lists, meaning shown after the answer, and the "only learned Koch characters" filter. Callsigns: the weighted worldwide prefix table and the 1×1–2×3 formats, plus "US only". Custom Practice: paste text, split by line or into N words per item, played in order. | Generators' tests pass. Each mode completes and persists. |
 | **6. ICR + adaptive** | ICR mode, response-time stats, adaptive weighting across modes. | QA item 5 passes. Adaptive tests pass. |
 | **7. Stats dashboard (trimmed)** | Overview tiles (Koch level, 7-day accuracy, today's practice minutes, median ICR response time). Character grid, where clicking a tile shows its most-confused-with list. Session history as a simple list with scores, with no replay. "Practice my weak characters". | Dashboard renders from real and seeded data. |
-| **10. Release** | Icons, About, licenses, README rewrite (install notes for SmartScreen), `release.yml`, updater plugin wired to GitHub Releases. | A tag produces the Windows installer (plus the untested `.dmg`). The QA checklist passes on Windows, except item 6 (sending), which is deferred. |
+| **10. Release** | Icons, About, licenses (the app is MIT), README rewrite (install notes for SmartScreen), `release.yml`. The updater was deferred on 2026-10-24 (§15.1). | A tag produces the Windows installer (plus the untested `.dmg`). The QA checklist passes on Windows, except item 6 (sending), which is deferred. |
 
 Phases 8 and 9 were dropped on 2026-10-23, and the release follows phase 7.
 
@@ -759,6 +759,7 @@ These stay described in the sections above for reference, but nothing in them is
 - **Phase 8, sending practice (§7.9):** keyboard straight key and paddles, iambic keyer, sidetone, decoder, timing analysis, free-send, MIDI and serial input.
 - **Phase 9, realism and extras:** noise, QSB, QRM, filter, pileup-lite, QSO simulation (§7.6), daily goals, streaks, achievements and reminders (§7.11).
 - **Cut from phase 5:** random min/max group length, group count versus duration, the English top-100 and top-500 word lists, user-made word lists, portable and affix callsign forms, MASTER.SCP import, Custom Practice .txt import, shuffled order and streamed playback.
+- **Cut from phase 10 (2026-10-24):** the updater plugin and its in-app update check. Users install a newer release over the old one. `docs/release.md` lists what wiring it needs.
 - **Cut from phase 7:** confusion matrix, trend charts, calendar heatmap, sortable and filterable history, the per-trial diff in history, session replay, and the per-character trend line.
 
 ---
@@ -769,7 +770,7 @@ Defaults are in effect until the owner answers.
 
 1. **App name:** "Morse Trainer" (default)?
 2. **Default Koch order:** LCWO (default) or Classic (v1)?
-3. **Code signing:** ship unsigned (default) and accept the SmartScreen click-through, or sign the Windows installer? Azure Trusted Signing is the cheapest option (about $10/month). An Apple Developer ID isn't needed while macOS is secondary.
+3. **Code signing:** *Answered 2026-10-24: unsigned.* Ship unsigned (default) and accept the SmartScreen click-through, or sign the Windows installer? Azure Trusted Signing is the cheapest option (about $10/month). An Apple Developer ID isn't needed while macOS is secondary.
 4. **Tray icon:** run minimized to the tray so daily reminders work when the window is closed? Default: no tray, and reminders only while the app is running.
-5. **Auto-update:** use GitHub Releases on `KeepitSimpleAnalytics/morse_code_app` (default)?
+5. **Auto-update:** use GitHub Releases on `KeepitSimpleAnalytics/morse_code_app` (default)? *Deferred 2026-10-24 (§15.1).*
 6. **Text Player, new user:** any specifics beyond §7.8, e.g. saving audio as MP3, or sharing Morse as a link or image?
