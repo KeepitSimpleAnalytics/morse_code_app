@@ -3,7 +3,7 @@ import { addNotice, errorText, useApp } from "../state/app";
 import { useNavStore } from "../state/nav";
 import { useSettings } from "../state/settings";
 import type { SettingKey } from "../state/settings-schema";
-import { useThemeStore, type ThemePreference } from "../state/theme";
+import { THEME_PREFERENCES, useThemeStore, type ThemePreference } from "../state/theme";
 
 /**
  * Keeps feature stores and settings in sync once a profile is open:
@@ -71,5 +71,5 @@ function applyDisplay(doc: Document, fontScale: number, reduceMotion: boolean): 
 }
 
 export function parseThemePreference(raw: string | null): ThemePreference | null {
-  return raw === "light" || raw === "dark" || raw === "system" ? raw : null;
+  return THEME_PREFERENCES.find((p) => p === raw) ?? null;
 }

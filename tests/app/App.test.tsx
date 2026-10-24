@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "../../src/App";
+import { SCREENS } from "../../src/app/screens";
 import { useNavStore } from "../../src/state/nav";
 import { bindThemeToDocument, useThemeStore } from "../../src/state/theme";
 import { openTestProfile } from "./harness";
@@ -43,19 +44,24 @@ describe("App shell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Random Groups" })).toBeInTheDocument();
   });
 
-  it("states honestly that unbuilt screens are not built yet", async () => {
+  it("opens every screen in the sidebar on its own page", async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole("button", { name: "Stats" }));
-    expect(screen.getByText(/Not built yet\. Arrives in phase 7\./)).toBeInTheDocument();
+    for (const s of SCREENS) {
+      await userEvent.click(screen.getByRole("button", { name: s.label }));
+      expect(screen.getByRole("heading", { level: 1, name: s.title })).toBeInTheDocument();
+    }
   });
 
   it("applies the chosen theme to <html data-theme>", async () => {
     const dispose = bindThemeToDocument(document, window);
     render(<App />);
-    expect(document.documentElement.dataset.theme).toBe("light");
-    await userEvent.click(screen.getByRole("radio", { name: "Dark" }));
-    expect(document.documentElement.dataset.theme).toBe("dark");
-    expect(screen.getByRole("radio", { name: "Dark" })).toHaveAttribute("aria-checked", "true");
+    expect(document.documentElement.dataset.theme).toBe("light"); // "system", OS light
+    const picker = screen.getByRole("combobox", { name: "Theme" });
+    for (const theme of ["dark", "contrast", "night", "terminal", "light"]) {
+      await userEvent.selectOptions(picker, theme);
+      expect(document.documentElement.dataset.theme).toBe(theme);
+    }
+    expect(picker).toHaveValue("light");
     dispose();
   });
 });

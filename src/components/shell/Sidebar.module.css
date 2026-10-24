@@ -8,8 +8,7 @@
   --color-focus: var(--sidebar-signal);
   color: var(--sidebar-text);
   background:
-    radial-gradient(120% 40% at 0% 0%, rgba(255, 176, 106, 0.07), transparent 70%),
-    var(--sidebar-bg);
+    radial-gradient(120% 40% at 0% 0%, var(--sidebar-glow), transparent 70%), var(--sidebar-bg);
   border-right: 1px solid var(--sidebar-border);
   overflow-y: auto;
   scrollbar-width: thin;
@@ -37,12 +36,13 @@
   width: 44px;
   height: 44px;
   border-radius: 13px;
-  color: var(--sidebar-signal);
+  /* The logo tile is midnight in every theme; its icon colour comes with the theme. */
+  color: var(--brand-mark-fg);
   background:
     radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.1), transparent 60%),
     linear-gradient(150deg, #332a4c, #15111d);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 176, 106, 0.2),
+    inset 0 0 0 1px var(--brand-mark-ring),
     0 6px 16px -6px rgba(0, 0, 0, 0.55),
     0 0 22px -8px var(--sidebar-signal-glow);
 }

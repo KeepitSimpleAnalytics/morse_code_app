@@ -1,9 +1,20 @@
 import { create } from "zustand";
 
-export type ThemePreference = "system" | "light" | "dark";
-export type ResolvedTheme = "light" | "dark";
+/** The themes in tokens.css (<html data-theme>), plus "system", which follows the OS light/dark. */
+export const THEMES = ["dark", "light", "contrast", "night", "terminal"] as const;
+export type ResolvedTheme = (typeof THEMES)[number];
+export type ThemePreference = ResolvedTheme | "system";
 
-export const THEME_PREFERENCES: readonly ThemePreference[] = ["light", "dark", "system"];
+export const THEME_PREFERENCES: readonly ThemePreference[] = [...THEMES, "system"];
+
+export const THEME_LABELS: Record<ThemePreference, string> = {
+  dark: "Dark",
+  light: "Light",
+  contrast: "High contrast",
+  night: "Night red",
+  terminal: "Green terminal",
+  system: "System default",
+};
 
 const DARK_QUERY = "(prefers-color-scheme: dark)";
 
@@ -25,7 +36,8 @@ interface ThemeState {
 // App-level preference (SPEC §7.12: theme is global, not per profile).
 // Persisted through the Store in phase 3; until then it lasts for the session.
 export const useThemeStore = create<ThemeState>()((set) => ({
-  preference: "system",
+  // Dark until the user picks otherwise (owner, 2026-10-23).
+  preference: "dark",
   systemPrefersDark: false,
   setPreference: (preference) => {
     set({ preference });

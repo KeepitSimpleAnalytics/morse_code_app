@@ -8,7 +8,8 @@
  * Contrast (WCAG 2.1), measured on every surface a token is used on:
  *   text ≥ 12.7:1 · text-muted ≥ 6:1 · text-subtle ≥ 4.6:1 (not used on the hero,
  *   where it would drop to 4.3:1) · accent-text ≥ 4.7:1 · on-accent ≥ 5:1.
- *   Sidebar (both themes): text ≥ 14.8:1 · muted ≥ 7.9:1 · subtle ≥ 6.2:1 · active ≥ 7.4:1.
+ *   Sidebar, dark: text ≥ 14.8:1 · muted ≥ 7.9:1 · subtle ≥ 6.2:1 · active ≥ 7.4:1.
+ *   Sidebar, light (on its hover shade): text ≥ 11.5:1 · muted ≥ 6:1 · subtle ≥ 4.5:1 · active ≥ 4.8:1.
  *   Hero icon: white on the coral tile ≥ 3.5:1 (non-text, 3:1 required).
  *
  * Theme selection: <html data-theme="light|dark"> is always set by state/theme.ts,
@@ -62,7 +63,7 @@
   --dur-slow: 420ms;
 
   color-scheme: light;
-  --color-bg: #f7f1e8;
+  --color-bg: #f3e9da;
   --color-bg-glow: rgba(244, 132, 80, 0.3);
   --color-bg-glow-2: rgba(120, 92, 190, 0.1);
   --color-surface: #fffdfa;
@@ -105,21 +106,21 @@
   --hero-icon-ring: rgba(255, 255, 255, 0.35);
   --hero-icon-shadow: 0 10px 22px -8px rgba(192, 70, 26, 0.6);
 
-  /*
-   * Sidebar: midnight ink in both themes. It anchors the layout, and the amber
-   * signal glows against it the same way in light and dark.
-   */
-  --sidebar-bg: #1d1829;
-  --sidebar-border: #2c2640;
-  --sidebar-hover: #2a2439;
-  --sidebar-text: #f3ede3;
-  --sidebar-muted: #c3bad0;
-  --sidebar-subtle: #a097ae;
-  --sidebar-active-bg: rgba(255, 176, 106, 0.15);
-  --sidebar-active-text: #ffb877;
-  --sidebar-signal: #ffb06a;
-  --sidebar-signal-glow: rgba(255, 176, 106, 0.6);
-  --sidebar-kbd-bg: #2f2940;
+  /* Sidebar: a deeper shade of the same paper, so it belongs to the page (owner, 2026-10-23). */
+  --sidebar-bg: #ece0cd;
+  --sidebar-border: #dccbb2;
+  --sidebar-hover: #e3d4bd;
+  --sidebar-text: #1f1a2e;
+  --sidebar-muted: #4f4760;
+  --sidebar-subtle: #615971;
+  --sidebar-active-bg: rgba(192, 70, 26, 0.12);
+  --sidebar-active-text: #9a3914;
+  --sidebar-signal: #b8431a;
+  --sidebar-signal-glow: rgba(192, 70, 26, 0.35);
+  --sidebar-kbd-bg: #e3d4bd;
+  --sidebar-glow: rgba(255, 176, 106, 0.07);
+  --brand-mark-fg: #ffb06a;
+  --brand-mark-ring: rgba(255, 176, 106, 0.2);
 
   --shadow-sm: 0 1px 2px rgba(70, 40, 20, 0.07), 0 1px 1px rgba(70, 40, 20, 0.04);
   --shadow-md: 0 10px 24px -10px rgba(110, 50, 20, 0.22), 0 2px 5px rgba(70, 40, 20, 0.06);
@@ -170,12 +171,228 @@
   --hero-icon-ring: rgba(255, 176, 106, 0.18);
   --hero-icon-shadow: none;
 
+  /* Sidebar: midnight ink, with the amber signal glowing against it. */
   --sidebar-bg: #0f0d16;
   --sidebar-border: #2c2839;
   --sidebar-hover: #1c1928;
+  --sidebar-text: #f3ede3;
+  --sidebar-muted: #c3bad0;
+  --sidebar-subtle: #a097ae;
+  --sidebar-active-bg: rgba(255, 176, 106, 0.15);
+  --sidebar-active-text: #ffb877;
+  --sidebar-signal: #ffb06a;
+  --sidebar-signal-glow: rgba(255, 176, 106, 0.6);
   --sidebar-kbd-bg: #221e30;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 22px -8px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 28px 56px -18px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/*
+ * High contrast: white on black with a yellow accent and a cyan focus ring, for
+ * low vision. Text ≥ 11:1 everywhere; borders are bright enough to see edges.
+ */
+:root[data-theme="contrast"] {
+  color-scheme: dark;
+  --color-bg: #000000;
+  --color-bg-glow: transparent;
+  --color-bg-glow-2: transparent;
+  --color-surface: #0b0b0b;
+  --color-surface-raised: #161616;
+  --color-surface-sunken: #000000;
+
+  --color-text: #ffffff;
+  --color-text-muted: #ececec;
+  --color-text-subtle: #d0d0d0;
+  --color-text-inverse: #000000;
+
+  --color-border: #9a9a9a;
+  --color-border-strong: #ffffff;
+
+  --color-accent: #ffe14d;
+  --color-accent-hover: #fff07a;
+  --color-accent-text: #ffe14d;
+  --color-accent-soft: rgba(255, 225, 77, 0.2);
+  --color-accent-softer: rgba(255, 225, 77, 0.1);
+  --color-on-accent: #000000;
+  --color-signal: #ffe14d;
+  --color-signal-glow: rgba(255, 225, 77, 0.5);
+
+  --color-success: #6dff9e;
+  --color-success-soft: rgba(109, 255, 158, 0.16);
+  --color-danger: #ff8a80;
+  --color-danger-soft: rgba(255, 138, 128, 0.18);
+  --color-warning: #ffb347;
+  --color-warning-soft: rgba(255, 179, 71, 0.18);
+
+  --color-focus: #4de1ff;
+
+  --hero-bg: #000000;
+  --hero-glow: transparent;
+  --hero-grid: rgba(255, 255, 255, 0.14);
+  --tip-bg: var(--color-accent-softer);
+  --hero-icon-bg: var(--color-accent-soft);
+  --hero-icon-fg: var(--color-accent-text);
+  --hero-icon-ring: rgba(255, 225, 77, 0.4);
+  --hero-icon-shadow: none;
+
+  --sidebar-bg: #000000;
+  --sidebar-border: #9a9a9a;
+  --sidebar-hover: #1c1c1c;
+  --sidebar-text: #ffffff;
+  --sidebar-muted: #ececec;
+  --sidebar-subtle: #d0d0d0;
+  --sidebar-active-bg: rgba(255, 225, 77, 0.2);
+  --sidebar-active-text: #ffe14d;
+  --sidebar-signal: #ffe14d;
+  --sidebar-signal-glow: rgba(255, 225, 77, 0.5);
+  --sidebar-kbd-bg: #1c1c1c;
+  --sidebar-glow: transparent;
+  --brand-mark-fg: #ffe14d;
+  --brand-mark-ring: rgba(255, 225, 77, 0.5);
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+}
+
+/*
+ * Night red: everything in dim reds on near-black, like a radio shack at night,
+ * so it doesn't spoil dark-adapted eyes. Text ≥ 4.9:1. Success, danger and
+ * warning differ in lightness here, and the diff always adds a symbol (§8.2).
+ */
+:root[data-theme="night"] {
+  color-scheme: dark;
+  --color-bg: #0b0101;
+  --color-bg-glow: rgba(255, 60, 40, 0.06);
+  --color-bg-glow-2: transparent;
+  --color-surface: #150404;
+  --color-surface-raised: #1e0606;
+  --color-surface-sunken: #060000;
+
+  --color-text: #ff6a5c;
+  --color-text-muted: #ec5446;
+  --color-text-subtle: #dc5244;
+  --color-text-inverse: #0b0101;
+
+  --color-border: #3a0e0a;
+  --color-border-strong: #5c1812;
+
+  --color-accent: #ff4a3a;
+  --color-accent-hover: #ff6a5c;
+  --color-accent-text: #ff7d70;
+  --color-accent-soft: rgba(255, 74, 58, 0.16);
+  --color-accent-softer: rgba(255, 74, 58, 0.08);
+  --color-on-accent: #0b0101;
+  --color-signal: #ff4a3a;
+  --color-signal-glow: rgba(255, 74, 58, 0.5);
+
+  --color-success: #ffa597;
+  --color-success-soft: rgba(255, 165, 151, 0.13);
+  --color-danger: #ff3b2b;
+  --color-danger-soft: rgba(255, 59, 43, 0.16);
+  --color-warning: #ff8a52;
+  --color-warning-soft: rgba(255, 138, 82, 0.14);
+
+  --color-focus: #ff8a7d;
+
+  --hero-bg: linear-gradient(135deg, #1a0505 0%, #150404 60%, #200606 100%);
+  --hero-glow: rgba(255, 60, 40, 0.2);
+  --hero-grid: rgba(255, 90, 70, 0.08);
+  --tip-bg: var(--color-accent-softer);
+  --hero-icon-bg: var(--color-accent-soft);
+  --hero-icon-fg: var(--color-accent-text);
+  --hero-icon-ring: rgba(255, 74, 58, 0.25);
+  --hero-icon-shadow: none;
+
+  --sidebar-bg: #070000;
+  --sidebar-border: #3a0e0a;
+  --sidebar-hover: #1a0505;
+  --sidebar-text: #ff6a5c;
+  --sidebar-muted: #ec5446;
+  --sidebar-subtle: #dc5244;
+  --sidebar-active-bg: rgba(255, 74, 58, 0.16);
+  --sidebar-active-text: #ff8a7d;
+  --sidebar-signal: #ff4a3a;
+  --sidebar-signal-glow: rgba(255, 74, 58, 0.5);
+  --sidebar-kbd-bg: #1e0606;
+  --sidebar-glow: rgba(255, 60, 40, 0.07);
+  --brand-mark-fg: #ff4a3a;
+  --brand-mark-ring: rgba(255, 74, 58, 0.25);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 22px -8px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 28px 56px -18px rgba(0, 0, 0, 0.8);
+}
+
+/*
+ * Green terminal: phosphor green on black, in monospace throughout. Text ≥ 6.9:1.
+ * Errors are amber, as on old amber/green terminals.
+ */
+:root[data-theme="terminal"] {
+  color-scheme: dark;
+  --font-display: var(--font-mono);
+  --font-ui: var(--font-mono);
+
+  --color-bg: #010a04;
+  --color-bg-glow: rgba(57, 255, 122, 0.05);
+  --color-bg-glow-2: transparent;
+  --color-surface: #03140a;
+  --color-surface-raised: #061c0e;
+  --color-surface-sunken: #000502;
+
+  --color-text: #5cff95;
+  --color-text-muted: #3fd677;
+  --color-text-subtle: #33b864;
+  --color-text-inverse: #010a04;
+
+  --color-border: #0d3a1c;
+  --color-border-strong: #17602f;
+
+  --color-accent: #39ff7a;
+  --color-accent-hover: #6dff9e;
+  --color-accent-text: #8cffb5;
+  --color-accent-soft: rgba(57, 255, 122, 0.14);
+  --color-accent-softer: rgba(57, 255, 122, 0.07);
+  --color-on-accent: #001a09;
+  --color-signal: #39ff7a;
+  --color-signal-glow: rgba(57, 255, 122, 0.5);
+
+  --color-success: #b8ffd2;
+  --color-success-soft: rgba(184, 255, 210, 0.12);
+  --color-danger: #ffb35c;
+  --color-danger-soft: rgba(255, 179, 92, 0.14);
+  --color-warning: #e9ff70;
+  --color-warning-soft: rgba(233, 255, 112, 0.12);
+
+  --color-focus: #b8ffd2;
+
+  --hero-bg: linear-gradient(135deg, #04180b 0%, #03140a 60%, #061f10 100%);
+  --hero-glow: rgba(57, 255, 122, 0.18);
+  --hero-grid: rgba(92, 255, 149, 0.08);
+  --tip-bg: var(--color-accent-softer);
+  --hero-icon-bg: var(--color-accent-soft);
+  --hero-icon-fg: var(--color-accent-text);
+  --hero-icon-ring: rgba(57, 255, 122, 0.25);
+  --hero-icon-shadow: none;
+
+  --sidebar-bg: #000502;
+  --sidebar-border: #0d3a1c;
+  --sidebar-hover: #05170b;
+  --sidebar-text: #5cff95;
+  --sidebar-muted: #3fd677;
+  --sidebar-subtle: #33b864;
+  --sidebar-active-bg: rgba(57, 255, 122, 0.14);
+  --sidebar-active-text: #8cffb5;
+  --sidebar-signal: #39ff7a;
+  --sidebar-signal-glow: rgba(57, 255, 122, 0.5);
+  --sidebar-kbd-bg: #061c0e;
+  --sidebar-glow: rgba(57, 255, 122, 0.06);
+  --brand-mark-fg: #39ff7a;
+  --brand-mark-ring: rgba(57, 255, 122, 0.25);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 22px -8px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 28px 56px -18px rgba(0, 0, 0, 0.8);
 }

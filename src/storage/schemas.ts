@@ -73,6 +73,7 @@ export const TrialSchema = z.object({
 export type Trial = z.infer<typeof TrialSchema>;
 
 export const OUTCOMES = ["correct", "substituted", "missed"] as const;
+export type Outcome = (typeof OUTCOMES)[number];
 
 export const CharEventSchema = z.object({
   id: z.number().int().positive(),

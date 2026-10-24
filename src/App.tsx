@@ -1,6 +1,6 @@
 import { DatabaseZap } from "lucide-react";
 import { useEffect } from "react";
-import { screenById } from "./app/screens";
+import { screenById, type ScreenId } from "./app/screens";
 import { screenForShortcut } from "./app/shortcuts";
 import { ShortcutsOverlay } from "./components/shell/Shortcuts";
 import { useShortcutsKey } from "./components/shell/shortcuts-state";
@@ -8,13 +8,12 @@ import { Sidebar } from "./components/shell/Sidebar";
 import { TopBar } from "./components/shell/TopBar";
 import { Banner } from "./components/ui";
 import { DrillScreen } from "./features/drill/DrillScreen";
-import { isDrillMode } from "./features/drill/store";
 import { IcrScreen } from "./features/icr/IcrScreen";
 import { KochScreen } from "./features/koch/KochScreen";
+import { StatsScreen } from "./features/stats/StatsScreen";
 import { Onboarding } from "./features/onboarding/Onboarding";
 import { TextPlayer } from "./features/player/TextPlayer";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
-import { ScreenIntro } from "./features/shell/ScreenIntro";
 import { dismissNotice, useApp } from "./state/app";
 import { useNavStore } from "./state/nav";
 import { useSettings } from "./state/settings";
@@ -75,25 +74,9 @@ function Shell() {
         <main className={styles.content} id="main">
           {screen.id === "player" ? (
             <TextPlayer />
-          ) : screen.id === "settings" ? (
-            <div className={styles.inner}>
-              <SettingsScreen />
-            </div>
-          ) : screen.id === "koch" ? (
-            <div className={styles.inner}>
-              <KochScreen />
-            </div>
-          ) : screen.id === "icr" ? (
-            <div className={styles.inner}>
-              <IcrScreen />
-            </div>
-          ) : isDrillMode(screen.id) ? (
-            <div className={styles.inner}>
-              <DrillScreen key={screen.id} mode={screen.id} />
-            </div>
           ) : (
             <div className={styles.inner}>
-              <ScreenIntro key={screen.id} screen={screen} />
+              <ScreenContent id={screen.id} />
             </div>
           )}
         </main>
@@ -101,6 +84,25 @@ function Shell() {
       <ShortcutsOverlay />
     </div>
   );
+}
+
+/** Every screen but the Text Player, which lays itself out. */
+function ScreenContent({ id }: { id: Exclude<ScreenId, "player"> }) {
+  switch (id) {
+    case "koch":
+      return <KochScreen />;
+    case "icr":
+      return <IcrScreen />;
+    case "groups":
+    case "words":
+    case "callsigns":
+    case "custom":
+      return <DrillScreen key={id} mode={id} />;
+    case "stats":
+      return <StatsScreen />;
+    case "settings":
+      return <SettingsScreen />;
+  }
 }
 
 function Notices() {

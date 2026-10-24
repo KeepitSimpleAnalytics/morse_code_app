@@ -302,6 +302,28 @@ export function storeContract(name: string, make: () => Store): void {
       });
     });
 
+    describe("char event queries", () => {
+      it("filters by character, mode, outcome and response time, newest first", async () => {
+        await store.createProfile(profile("a"));
+        await store.createProfile(profile("b"));
+        await store.startSession(session("s", "a"));
+        await store.startSession(session("sb", "b"));
+        await store.recordTrial(trial("s", "a", "KMR", "KMS"));
+        await store.recordTrial(trial("s", "a", "R", "S", { mode: "icr", responseMs: 700 }));
+        await store.recordTrial(trial("s", "a", "R", "R", { mode: "icr", responseMs: 400 }));
+        await store.recordTrial(trial("sb", "b", "R", "S"));
+
+        const rs = await store.queryCharEvents("a", { ch: "R" });
+        expect(rs.map((e) => e.typed)).toEqual([null, "S", "S"]); // newest first
+        const subs = await store.queryCharEvents("a", { ch: "R", outcome: "substituted" });
+        expect(subs).toHaveLength(2);
+        const icr = await store.queryCharEvents("a", { mode: "icr", withResponse: true });
+        expect(icr.map((e) => e.responseMs)).toEqual([400, 700]);
+        expect(await store.queryCharEvents("a", { mode: "icr", limit: 1 })).toHaveLength(1);
+        expect(await store.queryCharEvents("a", { ch: "Q" })).toEqual([]);
+      });
+    });
+
     describe("Koch progress", () => {
       it("keeps one level per order and the full history", async () => {
         await store.createProfile(profile("a"));

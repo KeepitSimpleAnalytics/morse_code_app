@@ -24,7 +24,15 @@ import {
   type WordList,
 } from "./schemas";
 import { insertMany, type SqlDriver, type SqlValue, type Statement } from "./sql-driver";
-import type { ImportMode, ImportResult, NewSession, SessionEnd, Store, TrialRecord } from "./store";
+import type {
+  CharEventQuery,
+  ImportMode,
+  ImportResult,
+  NewSession,
+  SessionEnd,
+  Store,
+  TrialRecord,
+} from "./store";
 import { StoreError } from "./store";
 import type { z } from "zod";
 
@@ -609,6 +617,30 @@ export class SqliteStore implements Store {
       "SELECT * FROM char_events WHERE profile_id = ? ORDER BY id",
       [profileId],
     );
+  }
+
+  async queryCharEvents(profileId: string, q: CharEventQuery): Promise<CharEvent[]> {
+    const where = ["profile_id = ?"];
+    const params: SqlValue[] = [profileId];
+    if (q.ch !== undefined) {
+      where.push("ch = ?");
+      params.push(q.ch);
+    }
+    if (q.mode !== undefined) {
+      where.push("mode = ?");
+      params.push(q.mode);
+    }
+    if (q.outcome !== undefined) {
+      where.push("outcome = ?");
+      params.push(q.outcome);
+    }
+    if (q.withResponse) where.push("response_ms IS NOT NULL");
+    let sql = `SELECT * FROM char_events WHERE ${where.join(" AND ")} ORDER BY ts DESC, id DESC`;
+    if (q.limit !== undefined) {
+      sql += " LIMIT ?";
+      params.push(q.limit);
+    }
+    return await this.rows(eventFrom, sql, params);
   }
 
   async getCharStats(profileId: string): Promise<CharStatRow[]> {

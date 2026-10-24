@@ -1,33 +1,46 @@
 .switch {
   display: inline-flex;
-  gap: 2px;
-  padding: 3px;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 4px 0 10px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   background: var(--color-surface-sunken);
-}
-
-.option {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 26px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
   color: var(--color-text-subtle);
-  transition:
-    background-color var(--dur-fast) var(--ease-out),
-    color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
 }
 
-.option:hover {
+.switch:hover {
   color: var(--color-text);
 }
 
-.option[aria-checked="true"] {
+.switch:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.select {
+  height: 100%;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+.select option {
   background: var(--color-surface-raised);
-  color: var(--color-accent-text);
-  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -81,11 +81,14 @@ export async function icrCharSet(
 
 /** Median response time over the profile's most recent correct ICR answers, or null with none. */
 export async function recentMedianMs(store: Store, profileId: string): Promise<number | null> {
-  const times = (await store.listCharEvents(profileId))
-    .filter((e) => e.mode === "icr" && e.outcome === "correct" && e.responseMs !== null)
-    .sort((a, b) => a.ts - b.ts || a.id - b.id)
-    .slice(-TARGET_SAMPLE)
-    .map((e) => e.responseMs as number);
+  const times = (
+    await store.queryCharEvents(profileId, {
+      mode: "icr",
+      outcome: "correct",
+      withResponse: true,
+      limit: TARGET_SAMPLE,
+    })
+  ).map((e) => e.responseMs as number);
   return times.length > 0 ? median(times) : null;
 }
 

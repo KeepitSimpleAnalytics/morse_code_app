@@ -21,7 +21,15 @@ import {
   type Trial,
   type WordList,
 } from "./schemas";
-import type { ImportMode, ImportResult, NewSession, SessionEnd, Store, TrialRecord } from "./store";
+import type {
+  CharEventQuery,
+  ImportMode,
+  ImportResult,
+  NewSession,
+  SessionEnd,
+  Store,
+  TrialRecord,
+} from "./store";
 import { StoreError } from "./store";
 
 /**
@@ -242,6 +250,20 @@ export class MemoryStore implements Store {
 
   async listCharEvents(profileId: string): Promise<CharEvent[]> {
     return copy(this.t.charEvents.filter((e) => e.profileId === profileId));
+  }
+
+  async queryCharEvents(profileId: string, q: CharEventQuery): Promise<CharEvent[]> {
+    const list = this.t.charEvents
+      .filter(
+        (e) =>
+          e.profileId === profileId &&
+          (q.ch === undefined || e.ch === q.ch) &&
+          (q.mode === undefined || e.mode === q.mode) &&
+          (q.outcome === undefined || e.outcome === q.outcome) &&
+          (!q.withResponse || e.responseMs !== null),
+      )
+      .sort((a, b) => b.ts - a.ts || b.id - a.id);
+    return copy(q.limit === undefined ? list : list.slice(0, q.limit));
   }
 
   async getCharStats(profileId: string): Promise<CharStatRow[]> {

@@ -1,0 +1,129 @@
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-4);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+}
+
+.tile dt {
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+}
+
+.tile dd {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.of {
+  font-size: var(--text-md);
+  color: var(--color-text-subtle);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+/* One hue, lightness by accuracy: readable for colour-blind users, and the value is printed. */
+.charTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-2) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--color-accent) var(--acc, 0%), var(--color-surface-sunken));
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.charTile[style] .charGlyph,
+.charTile[style] .charValue {
+  text-shadow: 0 0 6px var(--color-surface);
+}
+
+.charTile[aria-pressed="true"] {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 1px;
+}
+
+.unseen {
+  border-style: dashed;
+  background: var(--color-surface-sunken);
+}
+
+.charGlyph {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.charValue {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.detailGlyph {
+  font-family: var(--font-mono);
+  font-size: var(--text-display);
+}
+
+.confusions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0;
+  list-style: none;
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  list-style: none;
+}
+
+.session {
+  display: grid;
+  grid-template-columns: minmax(150px, auto) minmax(140px, 1fr) 4ch auto;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.session:first-child {
+  border-top: none;
+}
+
+.when {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.mode {
+  font-weight: 600;
+}
+
+.score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  text-align: right;
+}

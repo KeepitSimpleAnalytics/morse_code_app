@@ -199,6 +199,11 @@
   background: linear-gradient(145deg, #ffc58f, #ff9a52);
 }
 
+/* Their hero icon background is a translucent tint, too faint behind the dark icon. */
+:root:is([data-theme="contrast"], [data-theme="night"], [data-theme="terminal"]) .playButton {
+  background: var(--color-accent);
+}
+
 .playButton:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow:

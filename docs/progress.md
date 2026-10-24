@@ -16,7 +16,8 @@ SPEC §15 and what is waiting on whom.
 | 4. Koch, scoring UI, session flow       | Built. Waiting for the owner to run a full lesson in `pnpm tauri dev` (QA 2).                         | see git log      |
 | 5. Other copy modes (trimmed)           | Built. Waiting for the owner to complete and persist a session in each mode in `pnpm tauri dev`.      | see git log      |
 | 6. ICR + adaptive                       | Built. Waiting for the owner to run QA 5 (ICR timing feels immediate, no stutter over 50 characters). | see git log      |
-| 7. Stats dashboard (trimmed)            | Not started.                                                                                          | —                |
+| 7. Stats dashboard (trimmed)            | Built and committed, but the code review's fixes are still to do (see "Next" below).                  | see git log      |
+| (extra) Themes                          | Done: Dark (default), Light, High contrast, Night red, Green terminal, System default.                | see git log      |
 | 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
 | 9. Realism + extras                     | Dropped, see SPEC §15.1.                                                                              | —                |
 | 10. Release                             | Not started. Follows phase 7.                                                                         | —                |
@@ -26,6 +27,8 @@ SPEC §15 and what is waiting on whom.
 The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in full. Phases 5 and 7 are trimmed, and phases 8 and 9 are dropped. SPEC §15 has the new scope and §15.1 lists everything deferred. Don't build anything on that list unless the owner asks.
 
 ## Open items (waiting on the owner)
+
+0. The owner tried the app in `pnpm tauri dev` on 2026-10-23 and said it "looks good". The formal QA items below haven't been confirmed one by one.
 
 1. **QA for phases 4 to 6.**
    - **Phase 6, QA 5:** run a 50-character ICR round in `pnpm tauri dev`. Timing should feel immediate, with no stutter. Then check the round summary: if it says some times were estimated, WebView2 didn't report its output timestamp (`AudioEngine.heardAt`), so tell me.
@@ -76,12 +79,44 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
   - Profiles saved on the removed QSO or Sending screens open on Koch, without an invalid-setting warning.
   - Koch and the Text Player share one keying scheduler (`src/audio/shared.ts`).
 
+## Themes (owner, 2026-10-23)
+
+- Dark is the default for a fresh install. A saved choice is kept: theme is app-wide, stored in `meta`, and read back through `parseThemePreference`.
+- The light theme was "too plain", and its dark sidebar looked bolted on. Its sidebar is now a deeper shade of the page paper, and the page background is a little warmer. The owner said the dark theme is "perfect", so it is unchanged.
+- The owner asked for three new themes:
+  - **High contrast:** white on black, yellow accent, cyan focus, no shadows.
+  - **Night red:** all reds on near-black.
+  - **Green terminal:** phosphor green, everything in the mono font, amber errors.
+- The theme picker is now a native `<select>` (palette icon) in the top bar and in Settings → Display. "System" is labelled "System default" (owner) and follows the OS light/dark setting.
+- How a theme works:
+  - It is one `:root[data-theme="…"]` block in `src/styles/tokens.css`, plus an entry in `THEMES` and `THEME_LABELS` in `src/state/theme.ts`.
+  - `tests/state/theme.test.ts` checks that every theme has a block.
+  - Every text colour was checked for WCAG contrast against every surface it sits on (≥ 4.5:1). The figures are in each block's comment.
+- Per-theme tokens added: `--sidebar-glow`, `--brand-mark-fg` and `--brand-mark-ring` (the logo tile stays midnight in every theme). The Text Player play button uses `--color-accent` in the three new themes.
+- Colours still hard-coded on purpose: the red dev banner, the modal backdrop, white text on profile avatars, and the logo tile's dark gradient.
+
 ## Phase 6 follow-ups (decided 2026-10-23)
 
 The owner asked me to research and decide these.
 
 - **ICR doesn't add Koch's newest-character multiplier.** Adaptive ICR already targets weak and slow characters, the way MorseCode.World's adaptive ICR trainer does. A newly learned character starts with no stats, so it is already weighted up (low accuracy, plus the recency bonus).
 - **Not built:** "Drill these in ICR", a speed-chip note saying a change applies from the next session, and storing the timing source with each session. They are small, but phase 5 and 6 are trimmed scope. Revisit only if the learner finds the speed behaviour confusing.
+
+## How Phase 7 is put together
+
+- `src/core/stats.ts`:
+  - `dayStart`, `practiceMsSince`, `accuracySince` (weighted by characters sent, §8.2).
+  - `confusions` ("You hear H as S 23% of the time").
+  - `weakForPractice` (§7.10: the 6 weakest with ≥ 20 attempts, then filled from the learned Koch characters).
+  - Tests are in `tests/core/stats.test.ts`.
+- `Store.queryCharEvents(profileId, {ch, mode, outcome, withResponse, limit})`, newest first, in both stores, with a contract test. ICR's Target median uses it too.
+- `src/features/stats/StatsScreen.tsx`:
+  - Overview tiles: Koch level, accuracy over the last 7 days, today's practice, ICR median.
+  - "Practise my weak characters".
+  - The character grid; clicking a tile shows its detail and confusions.
+  - Session history in pages of 20.
+  - Tests are in `tests/features/stats/`.
+- `App.tsx` routes screens with an exhaustive switch. The `ScreenIntro` placeholder was deleted, since every screen is built.
 
 ## How Phase 6 is put together
 
@@ -160,17 +195,26 @@ The owner asked me to research and decide these.
 
 1. Read `CLAUDE.md`, then this file, then the SPEC section for the next phase.
 2. Ask the owner for the open items above.
-3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 6 commit: 351 TS tests and 8 Rust tests.
+3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the latest commit: 360 TS tests and 8 Rust tests.
+   - **pnpm on this PC (2026-10-23):** the corepack shim in `%APPDATA%\npm` is gone, so plain `pnpm` isn't found. Use `corepack pnpm <cmd>`.
+   - `pnpm tauri dev` also runs `pnpm dev` itself (beforeDevCommand). For that, put a folder on PATH with a `pnpm.cmd` containing `@echo off` / `corepack pnpm %*`, then run `corepack pnpm tauri dev`. A real fix is to re-run `corepack enable` from an elevated shell, or with `--install-directory` pointing at a folder on PATH.
 4. `pnpm tauri dev` runs the app.
+   - Vite hot-reloads while code is being edited. A reload in the middle of a multi-file change can leave the window black ("does not provide an export named …"). Restart the dev app after a batch of edits. It isn't a bug in the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. **Next: phase 7 (Stats dashboard, trimmed).** Phases 5 and 6 are done. The notes below record how they were planned. The owner asked on 2026-10-23 for both to be finished in one go. Present one combined task list, get it approved, then build phase 5, commit, build phase 6, commit.
-   - **Phase 5 (trimmed, SPEC §15 and §15.1):** Random Groups, Words, Callsigns and Custom Practice.
-     - Reuse the copy-mode pieces from phase 4: the diff, results and replay in `KochScreen.tsx` (move them into a shared component), `buildTrialRecord`, and the `epoch`/ticket pattern in `features/koch/controller.ts`.
-     - These modes are per item (SPEC §7, "Common pattern"): play, type, submit, with Repeat and Reveal, and a trial written per item. Koch is the only stream mode.
-     - Wire up "Practice these characters" on the Koch results, which opens Random Groups on those characters.
-     - Bundled data (`v1-common`, `qcodes`, `cw-abbrev`, `prefixes.json`) needs its source and license in `src/data/README.md`.
-   - **Phase 6 (in full, SPEC §7.2, §8.3):** the ICR screen, response-time stats (`ewmaRt` is already in `char_stats`), and adaptive weighting across modes.
-     - `src/core/adaptive.ts` already has the weights, including the response-time factor for ICR.
-     - Acceptance is QA 5: ICR timing feels immediate, with no stutter over 50 characters.
-   - After each phase: run the full checks, have the code-reviewer agent review the diff (in phase 4 it found real races), update this file, then commit.
+5. **Next: the phase 7 code-review fixes, then a commit, then phase 10 (Release).** Phases 5–7 and the themes are committed. The code reviewer's findings on phase 7, most important first:
+   1. "Practise my weak characters" must run with adaptive weighting on (§7.10). At the moment `practiseChars` only overrides the characters, and `planGroups` follows the saved `groups.weighting`. Pass a weighting override as well.
+   2. The ICR median query (`mode = icr`, correct, with a response, newest 200) can't use the only index `(profile_id, ch, ts)`, so it scans every event. Add migration `0002`: `CREATE INDEX idx_char_events_profile_mode_ts ON char_events(profile_id, mode, ts)`. Then check `EXPLAIN QUERY PLAN` in the better-sqlite3 tests.
+   3. In `StatsScreen`, `error` isn't keyed to the profile, so a failed load's banner stays up after a profile switch and hides the busy state. Key it the way `data` is keyed, and also reset `selected` on a profile switch.
+   4. The 7-day window `dayStart(now) - 6 * DAY_MS` is an hour off across a clock change (the UK/EU change is 2026-10-25). Add a core helper that uses `setDate(getDate() - n)` after `setHours(0, 0, 0, 0)`, with a test.
+   5. The per-character "Median response (ICR)" counts wrong answers, but the overview median uses only correct ones. Add `outcome: "correct"` to the per-character query.
+   6. The "last 200" label is hard-coded: use `TARGET_SAMPLE`. `CHAR_RT_SAMPLE` duplicates it.
+   7. Have both stores reject a negative `limit` in `queryCharEvents` (`StoreError`). Add a contract test that `limit` keeps the newest rows, plus one for ties on `ts`.
+   8. Opening a character fetches every substituted and missed row just to count them. Add an aggregate query (GROUP BY outcome, typed), and skip it when the character has no stats.
+   9. The `<span>` captions inside `<dl>` groups are invalid markup: move them into a `<dd>`. Give the loading placeholder visually hidden "Loading your stats…" text.
+   10. Check tile contrast at 100% accuracy in every theme (now five), or cap the colour mix at about 70%.
+   11. Add the last-seen date to the tile label (§7.10 hover).
+   12. `ScreenDef.summary`, `highlights` and `phase` in `src/app/screens.ts` are unused now. Remove them.
+   13. Tests to add: the 7-day boundary and the clock change; `weakForPractice` with more than 6 qualifying characters; StatsScreen across a profile switch and in its error state.
+   - After that, run the full checks and have the code-reviewer agent go over the fixes. Then commit.
+   - Then do phase 10 (SPEC §15): icons, About with the data licences, a README with SmartScreen notes, `release.yml` and the updater. Pushing is blocked until the KeepitSimple SSH key exists (open item 3). The owner also needs to choose signed or unsigned (SPEC §16 Q3). The default is unsigned, and the owner leaned that way for a single learner.

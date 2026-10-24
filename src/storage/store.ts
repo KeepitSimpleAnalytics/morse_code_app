@@ -5,6 +5,8 @@ import type {
   KochLevelHistory,
   KochProgress,
   LevelReason,
+  Mode,
+  Outcome,
   Profile,
   ProfileData,
   Session,
@@ -39,6 +41,17 @@ export interface TrialRecord {
   events: Omit<CharEvent, "id">[];
   /** Errors in this trial, including insertions (§8.2), added to the session totals. */
   errors: number;
+}
+
+/** A filtered read of char_events (Stats, ICR's Target). All fields are optional. */
+export interface CharEventQuery {
+  ch?: string;
+  mode?: Mode;
+  outcome?: Outcome;
+  /** Only events with a response time (ICR). */
+  withResponse?: boolean;
+  /** The newest this many. */
+  limit?: number;
 }
 
 export type ImportMode = "merge" | "replace";
@@ -82,6 +95,8 @@ export interface Store {
   recordTrial(record: TrialRecord): Promise<void>;
   listTrials(sessionId: string): Promise<Trial[]>;
   listCharEvents(profileId: string): Promise<CharEvent[]>;
+  /** Matching events, newest first. */
+  queryCharEvents(profileId: string, query: CharEventQuery): Promise<CharEvent[]>;
 
   /* char_stats: an incremental cache over char_events (§8.3). */
   getCharStats(profileId: string): Promise<CharStatRow[]>;
