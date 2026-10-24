@@ -153,6 +153,14 @@ export class KeyingScheduler {
     return true;
   }
 
+  /**
+   * Clock time (seconds) at which the last queued element's key-up ends, or null
+   * with nothing queued. ICR times responses from here (SPEC §7.2).
+   */
+  endTime(): number | null {
+    return this.queue[this.queue.length - 1]?.end ?? null;
+  }
+
   /** Distinct tokens queued in live mode that haven't started yet. */
   pendingTokens(): number {
     const now = this.deps.clock.currentTime;

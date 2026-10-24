@@ -17,7 +17,8 @@ const ROWS: readonly { action: string; keys: readonly string[][] }[] = [
   { action: "Reveal", keys: [[M, "Shift", "Enter"]] },
   { action: "Text Player play / pause", keys: [[M, "Enter"], ["Space"]] },
   { action: "Go to a mode", keys: [[M, "1…8"]] },
-  { action: "Instant Recognition: answer", keys: [["the character's key"]] },
+  { action: "Instant Recognition: answer", keys: [["the character's key, including ?"]] },
+  { action: "Instant Recognition: resume or retry", keys: [[M, "Enter"]] },
   { action: "This list", keys: [["?"]] },
 ];
 

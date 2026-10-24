@@ -1,7 +1,6 @@
 import { audioEngine } from "../../audio/engine";
 import { currentScheduler, getScheduler } from "../../audio/shared";
 import type { KeyingScheduler } from "../../audio/scheduler";
-import { adaptiveWeights, type CharStat } from "../../core/adaptive";
 import { effectiveRiseMs } from "../../core/envelope";
 import {
   kochChars,
@@ -32,6 +31,7 @@ import type { SettingsValues } from "../../state/settings-schema";
 import { buildTrialRecord } from "../../storage/records";
 import type { LevelReason, Session } from "../../storage/schemas";
 import type { TrialRecord } from "../../storage/store";
+import { loadWeights } from "../copy/weights";
 import * as player from "../player/controller";
 import { initialKochState, useKochStore, type LessonResult, type LevelInfo } from "./store";
 
@@ -344,15 +344,8 @@ export async function beginLesson(): Promise<void> {
 
     let weights: Map<string, number> | undefined;
     if (v["learning.adaptive"]) {
-      const recent = await store.listSessions(profileId, 3);
+      weights = await loadWeights(store, profileId, info.chars, "copy");
       if (stale(t)) return;
-      const stats = new Map<string, CharStat>(
-        Object.values(info.stats).map((r) => [r.ch, r] as const),
-      );
-      weights = adaptiveWeights(info.chars, stats, {
-        mode: "copy",
-        recentSessionsSince: recent.length >= 3 ? (recent[2]?.startedAt ?? null) : null,
-      });
     }
     const plan = planLesson({
       seed,

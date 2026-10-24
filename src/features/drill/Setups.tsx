@@ -1,5 +1,5 @@
 import { Play } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { PRIMARY_MODIFIER_LABEL } from "../../app/shortcuts";
 import { Segmented, Slider, Toggle } from "../../components/controls";
 import { Button, Field } from "../../components/ui";
@@ -14,7 +14,6 @@ import {
 } from "../../core/generators/callsigns";
 import { GROUP_LENGTH_MAX, GROUP_LENGTH_MIN } from "../../core/generators/groups";
 import { wordsUsing } from "../../core/generators/words";
-import { errorText, requireStore, useApp } from "../../state/app";
 import { useSettings } from "../../state/settings";
 import {
   CUSTOM_CHARSET_MAX,
@@ -26,45 +25,14 @@ import {
   type Weighting,
 } from "../../state/settings-schema";
 import ui from "../copy/copy.module.css";
+import { useLearnedChars } from "../copy/useLearnedChars";
 import * as drill from "./controller";
-import { learnedKochChars } from "./modes";
 import { drillStores, type DrillMode } from "./store";
 import styles from "./drill.module.css";
 
 /** The setup card of each per-item mode: its options, a preview, and Start. */
 
 type ItemsKey = "groups.items" | "words.items" | "callsigns.items";
-
-interface Learned {
-  readonly key: string;
-  readonly chars: readonly string[] | null;
-  readonly error: string | null;
-}
-
-/** The learned Koch characters, for previews. `chars` is null while loading. */
-function useLearnedChars(): { chars: readonly string[] | null; error: string | null } {
-  const profileId = useApp((s) => s.current?.id);
-  const order = useSettings((s) => s.values["learning.kochOrder"]);
-  const key = `${profileId ?? ""}|${order}`;
-  const [loaded, setLoaded] = useState<Learned | null>(null);
-  useEffect(() => {
-    let live = true;
-    if (profileId) {
-      learnedKochChars(requireStore(), profileId, useSettings.getState().values).then(
-        (chars) => {
-          if (live) setLoaded({ key, chars, error: null });
-        },
-        (err: unknown) => {
-          if (live) setLoaded({ key, chars: null, error: errorText(err) });
-        },
-      );
-    }
-    return () => {
-      live = false;
-    };
-  }, [key, profileId]);
-  return loaded?.key === key ? loaded : { chars: null, error: null };
-}
 
 function SetupCard({
   mode,

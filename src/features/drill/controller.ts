@@ -13,7 +13,7 @@ import { addNotice, errorText, requireProfile, requireStore } from "../../state/
 import { useSettings } from "../../state/settings";
 import type { SettingsValues } from "../../state/settings-schema";
 import { buildTrialRecord } from "../../storage/records";
-import type { TrialRecord } from "../../storage/store";
+import { saveTrial } from "../copy/save";
 import * as player from "../player/controller";
 import { planDrill, SetupError } from "./modes";
 import {
@@ -296,21 +296,6 @@ async function score(mode: DrillMode, revealed: boolean): Promise<void> {
   state(mode).set({ feedback: result });
   if (applyPauseAfterSave(mode, r, "feedback")) return;
   state(mode).set({ phase: "feedback" });
-}
-
-/**
- * Writes a trial. If an earlier attempt reported failure but did commit, the
- * retry hits the same id: that trial is already saved, so it counts as success.
- */
-async function saveTrial(record: TrialRecord): Promise<void> {
-  const db = requireStore();
-  try {
-    await db.recordTrial(record);
-  } catch (err) {
-    const saved = await db.listTrials(record.trial.sessionId).catch(() => []);
-    if (saved.some((x) => x.id === record.trial.id)) return;
-    throw err;
-  }
 }
 
 /** Applies a pause that was asked for while saving. Returns true if it paused. */

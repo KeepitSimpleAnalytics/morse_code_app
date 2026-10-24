@@ -9,6 +9,7 @@ import { TopBar } from "./components/shell/TopBar";
 import { Banner } from "./components/ui";
 import { DrillScreen } from "./features/drill/DrillScreen";
 import { isDrillMode } from "./features/drill/store";
+import { IcrScreen } from "./features/icr/IcrScreen";
 import { KochScreen } from "./features/koch/KochScreen";
 import { Onboarding } from "./features/onboarding/Onboarding";
 import { TextPlayer } from "./features/player/TextPlayer";
@@ -81,6 +82,10 @@ function Shell() {
           ) : screen.id === "koch" ? (
             <div className={styles.inner}>
               <KochScreen />
+            </div>
+          ) : screen.id === "icr" ? (
+            <div className={styles.inner}>
+              <IcrScreen />
             </div>
           ) : isDrillMode(screen.id) ? (
             <div className={styles.inner}>

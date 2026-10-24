@@ -45,8 +45,8 @@ describe("App shell", () => {
 
   it("states honestly that unbuilt screens are not built yet", async () => {
     render(<App />);
-    await userEvent.click(screen.getByRole("button", { name: "Instant Recognition" }));
-    expect(screen.getByText(/Not built yet\. Arrives in phase 6\./)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Stats" }));
+    expect(screen.getByText(/Not built yet\. Arrives in phase 7\./)).toBeInTheDocument();
   });
 
   it("applies the chosen theme to <html data-theme>", async () => {

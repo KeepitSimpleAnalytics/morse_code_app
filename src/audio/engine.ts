@@ -97,6 +97,61 @@ export class AudioEngine {
     return { baseMs, outputMs, totalMs: baseMs + outputMs };
   }
 
+  /**
+   * When a moment on the audio clock is heard, as a performance.now() time (ms),
+   * so it can be compared with a KeyboardEvent's timeStamp. Uses
+   * getOutputTimestamp(), which maps the clock to the moment samples leave the
+   * device. A context that can't report one yet (performanceTime 0, just after
+   * starting) is mapped from currentTime plus the output latency instead, and
+   * `source` says which was used.
+   */
+  heardAt(contextTime: number): { ms: number; source: "output-timestamp" | "latency" } {
+    const ctx = this.ctx;
+    if (!ctx) throw new Error("audio hasn't started");
+    const ts = typeof ctx.getOutputTimestamp === "function" ? ctx.getOutputTimestamp() : null;
+    if (
+      ts?.contextTime !== undefined &&
+      ts.performanceTime !== undefined &&
+      ts.performanceTime > 0
+    ) {
+      return {
+        ms: ts.performanceTime + (contextTime - ts.contextTime) * 1000,
+        source: "output-timestamp",
+      };
+    }
+    const latencySec = (ctx.baseLatency || 0) + (ctx.outputLatency || 0);
+    return {
+      ms: performance.now() + (contextTime - ctx.currentTime + latencySec) * 1000,
+      source: "latency",
+    };
+  }
+
+  /**
+   * A short soft tick (ICR's "correct" sound), on the shared context. It goes
+   * through the volume control but not the keying gain, so it never disturbs
+   * scheduled Morse.
+   */
+  tick(): void {
+    const ctx = this.ctx;
+    const master = this.master;
+    if (!ctx || !master) throw new Error("audio hasn't started");
+    const t = ctx.currentTime + 0.005;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = 1800;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.25, t + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+    osc.connect(gain).connect(master);
+    osc.start(t);
+    osc.stop(t + 0.05);
+    osc.onended = () => {
+      osc.disconnect();
+      gain.disconnect();
+    };
+  }
+
   /** Output latency in seconds, used to align highlighting with what is heard. */
   outputLatencySec(): number {
     return this.ctx?.outputLatency ?? 0;

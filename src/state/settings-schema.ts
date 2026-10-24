@@ -7,6 +7,16 @@ import { DRILL_ITEMS_DEFAULT, DRILL_ITEMS_MAX, DRILL_ITEMS_MIN } from "../core/d
 import { DEFAULT_RISE_MS, RISE_MS_MAX, RISE_MS_MIN } from "../core/envelope";
 import { CALLSIGN_FORMATS, type CallsignFormat } from "../core/generators/callsigns";
 import { GROUP_LENGTH_MAX, GROUP_LENGTH_MIN } from "../core/generators/groups";
+import {
+  ICR_COUNT_DEFAULT,
+  ICR_COUNT_MAX,
+  ICR_COUNT_MIN,
+  ICR_MINUTES_MAX,
+  ICR_MINUTES_MIN,
+  ICR_TIMEOUT_DEFAULT_MS,
+  ICR_TIMEOUT_MAX_MS,
+  ICR_TIMEOUT_MIN_MS,
+} from "../core/icr";
 import { DEFAULT_KOCH_ORDER, KOCH_ORDERS, type KochOrderId } from "../core/koch";
 import {
   KOCH_GROUP_LENGTHS,
@@ -68,6 +78,11 @@ export const CUSTOM_CHARSET_MAX = 200;
 /** Custom Practice text; the same limit as the Text Player. */
 export const CUSTOM_TEXT_MAX = PLAYER_MAX_CHARS;
 const items = int(DRILL_ITEMS_MIN, DRILL_ITEMS_MAX);
+/** ICR draws from the learned Koch characters, every single-key character, or a custom set. */
+export const ICR_CHARSETS = ["koch", "all", "custom"] as const;
+export type IcrCharset = (typeof ICR_CHARSETS)[number];
+export const ICR_ROUND_KINDS = ["count", "minutes"] as const;
+export type IcrRoundKind = (typeof ICR_ROUND_KINDS)[number];
 
 export const SETTINGS = {
   /* Timing (training) */
@@ -140,6 +155,19 @@ export const SETTINGS = {
   "custom.text": { schema: z.string().max(CUSTOM_TEXT_MAX), default: "" },
   "custom.split": { schema: z.enum(CHUNK_KINDS), default: "line" as ChunkKind },
   "custom.wordsPerItem": { schema: int(WORDS_PER_ITEM_MIN, WORDS_PER_ITEM_MAX), default: 3 },
+
+  /* Instant Character Recognition (§7.2) */
+  "icr.charset": { schema: z.enum(ICR_CHARSETS), default: "koch" as IcrCharset },
+  "icr.custom": { schema: z.string().max(CUSTOM_CHARSET_MAX), default: "" },
+  "icr.timeoutMs": {
+    schema: int(ICR_TIMEOUT_MIN_MS, ICR_TIMEOUT_MAX_MS),
+    default: ICR_TIMEOUT_DEFAULT_MS,
+  },
+  "icr.target": { schema: z.boolean(), default: false },
+  "icr.roundKind": { schema: z.enum(ICR_ROUND_KINDS), default: "count" as IcrRoundKind },
+  "icr.count": { schema: int(ICR_COUNT_MIN, ICR_COUNT_MAX), default: ICR_COUNT_DEFAULT },
+  "icr.minutes": { schema: int(ICR_MINUTES_MIN, ICR_MINUTES_MAX), default: 2 },
+  "icr.tick": { schema: z.boolean(), default: true },
 
   /* Text Player: its own speed and sound, separate from training (§7.8) */
   "player.text": { schema: z.string().max(PLAYER_MAX_CHARS), default: PLAYER_SAMPLE_TEXT },

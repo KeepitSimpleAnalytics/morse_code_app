@@ -15,7 +15,7 @@ SPEC §15 and what is waiting on whom.
 | 3. Storage, profiles, settings          | Built. The owner skipped QA 3 and 7 on 2026-10-23.                                                    | 8ec5d62          |
 | 4. Koch, scoring UI, session flow       | Built. Waiting for the owner to run a full lesson in `pnpm tauri dev` (QA 2).                         | see git log      |
 | 5. Other copy modes (trimmed)           | Built. Waiting for the owner to complete and persist a session in each mode in `pnpm tauri dev`.      | see git log      |
-| 6. ICR + adaptive                       | Not started.                                                                                          | —                |
+| 6. ICR + adaptive                       | Built. Waiting for the owner to run QA 5 (ICR timing feels immediate, no stutter over 50 characters). | see git log      |
 | 7. Stats dashboard (trimmed)            | Not started.                                                                                          | —                |
 | 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
 | 9. Realism + extras                     | Dropped, see SPEC §15.1.                                                                              | —                |
@@ -27,7 +27,10 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 
 ## Open items (waiting on the owner)
 
-1. **Phase 4 QA.**
+1. **QA for phases 4 to 6.**
+   - **Phase 6, QA 5:** run a 50-character ICR round in `pnpm tauri dev`. Timing should feel immediate, with no stutter. Then check the round summary: if it says some times were estimated, WebView2 didn't report its output timestamp (`AudioEngine.heardAt`), so tell me.
+   - **Phase 5:** complete one session in each of Random Groups, Words, Callsigns and Custom. Quit, relaunch, and check the sessions are saved.
+   - **Phase 4:** the items below.
    - **Item 2:** run a Koch lesson in `pnpm tauri dev`, score it, quit, relaunch, and check the lesson count and character tiles on the level card.
    - **Item 8:** kill the app mid-lesson (Task Manager → End task) and relaunch. The lesson's session is saved as incomplete. A Koch lesson is written as one trial when it is scored, so a killed lesson has no trial.
    - **Item 12:** minimize mid-lesson. The lesson pauses, and the hidden time isn't counted.
@@ -72,6 +75,37 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
   - "Best lesson here", the lesson count and the step-back check only count lessons with at least a minute of audio (the snapshot records `audioMs`).
   - Profiles saved on the removed QSO or Sending screens open on Koch, without an invalid-setting warning.
   - Koch and the Text Player share one keying scheduler (`src/audio/shared.ts`).
+
+## Open questions from phase 6
+
+- SPEC §8.3 applies the Koch newest-character multiplier "on top". ICR's "Koch learned" set doesn't apply it, because ICR is about speed on every character, not drilling the newest one. Should it?
+- These were not built, and are suggestions only: "Drill these in ICR" from results; a note in the speed chip that a change applies from the next round or session; storing the timing source with each session.
+
+## How Phase 6 is put together
+
+- `src/core/icr.ts`:
+  - Single-key mapping (prosigns excluded).
+  - The Target timeout.
+  - Median and percentile.
+  - The round summary.
+  - Tests are in `tests/core/icr.test.ts`.
+- `src/audio/`:
+  - `scheduler.endTime()`.
+  - `engine.heardAt(t)`: maps an audio-clock time to `performance.now()` through `getOutputTimestamp()`. It falls back to `currentTime` plus latency before the device reports a timestamp, and the results then say how many times were estimated.
+  - `engine.tick()`: the soft "correct" sound, on the shared context.
+- `src/features/icr/`:
+  - The controller (epoch/ticket as before, plus a `resuming` phase so a pause during a resume or retry takes effect), the store, and `IcrScreen.tsx`.
+  - Tests are in `tests/features/icr/`, including the races the reviewer found.
+- **Timing:**
+  - A response is `KeyboardEvent.timeStamp` minus the heard end of the sound.
+  - A key while it sounds counts as 0 ms (owner). A key before it starts is ignored.
+  - A key after the deadline is a timeout, and a timeout is recorded at the timeout value.
+- **Keys:**
+  - A capture-phase listener takes answers before any other shortcut, and AltGr is allowed.
+  - Mid-round, Space, Enter and `?` are swallowed.
+  - Opening any dialog or menu pauses the round.
+- **Adaptive:** `src/features/copy/weights.ts` is shared. Koch and Random Groups use copy weights, and ICR uses ICR weights (response-time factor). Answers are saved through `copy/save.ts`, which treats a retry of an already committed trial as success.
+- Settings keys: `icr.*`.
 
 ## How Phase 5 is put together
 
@@ -124,11 +158,11 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
 
 1. Read `CLAUDE.md`, then this file, then the SPEC section for the next phase.
 2. Ask the owner for the open items above.
-3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 5 commit: 327 TS tests (Rust unchanged since phase 4: 8 tests).
+3. Run `pnpm i`, then `pnpm test`, `pnpm lint`, `pnpm typecheck`. In `src-tauri/`, run `cargo test` and `cargo clippy --all-targets -- -D warnings`. All of these pass at the phase 6 commit: 351 TS tests and 8 Rust tests.
 4. `pnpm tauri dev` runs the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. **Phases 5 and 6, back to back (phase 5 done).** The owner asked on 2026-10-23 for both to be finished in one go. Present one combined task list, get it approved, then build phase 5, commit, build phase 6, commit.
+5. **Next: phase 7 (Stats dashboard, trimmed).** Phases 5 and 6 are done. The notes below record how they were planned. The owner asked on 2026-10-23 for both to be finished in one go. Present one combined task list, get it approved, then build phase 5, commit, build phase 6, commit.
    - **Phase 5 (trimmed, SPEC §15 and §15.1):** Random Groups, Words, Callsigns and Custom Practice.
      - Reuse the copy-mode pieces from phase 4: the diff, results and replay in `KochScreen.tsx` (move them into a shared component), `buildTrialRecord`, and the `epoch`/ticket pattern in `features/koch/controller.ts`.
      - These modes are per item (SPEC §7, "Common pattern"): play, type, submit, with Repeat and Reveal, and a trial written per item. Koch is the only stream mode.

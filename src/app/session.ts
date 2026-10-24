@@ -1,4 +1,5 @@
 import { resetDrills } from "../features/drill/controller";
+import { resetIcr } from "../features/icr/controller";
 import { resetKoch } from "../features/koch/controller";
 import * as player from "../features/player/controller";
 import { usePlayerStore } from "../features/player/store";
@@ -31,6 +32,7 @@ function applyToFeatures(v: SettingsValues): void {
   player.stop();
   resetKoch();
   resetDrills();
+  resetIcr();
   usePlayerStore.getState().set({
     text: v["player.text"],
     speeds: v["player.speeds"],
