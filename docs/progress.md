@@ -20,7 +20,7 @@ SPEC §15 and what is waiting on whom.
 | (extra) Themes                          | Done: Dark (default), Light, High contrast, Night red, Green terminal, System default.                | see git log      |
 | 8. Sending practice                     | Dropped, see SPEC §15.1.                                                                              | —                |
 | 9. Realism + extras                     | Dropped, see SPEC §15.1.                                                                              | —                |
-| 10. Release                             | Built. The tag → draft-release run and the Windows QA checklist wait on pushing (open item 3).        | see git log      |
+| 10. Release                             | v2.0.0 tagged; draft release built (2026-10-26). Publishing waits on the Windows QA (open item 1).    | see git log      |
 
 ## Scope cut (2026-10-23)
 
@@ -45,7 +45,9 @@ The owner judged v2 over-engineered and cut it back. Phase 4 and phase 6 stay in
    - CI first ran on 2026-10-24. The fixes it needed:
      - `better-sqlite3` (tests only) ships prebuilt binaries, so its native build is now skipped (`pnpm.ignoredBuiltDependencies`). The compile had failed on the Windows runner.
      - The Ctrl+digit test now uses Cmd on macOS.
-   - The first release follows `docs/release.md`: tag `v2.0.0`, run the QA checklist on the draft's installer, then publish. `release.yml` hasn't run yet.
+   - **v2.0.0 (2026-10-26):** tagged on `e0be7c4`. `release.yml` run 40260790939 made the draft "Morse Trainer v2.0.0" with `Morse.Trainer_2.0.0_x64-setup.exe`, the universal `.dmg` and `.app.tar.gz`.
+     - The first attempt failed after creating the draft: the release list didn't show the new draft yet when the step searched it again. A re-run found it. `release.yml` now takes the id from the create call (fixed after the tag, so the tagged commit still has the old step).
+   - **Still to do:** run the QA checklist (open item 1 and SPEC §14.3) on the draft's installer, then publish the draft (`docs/release.md` steps 6–7).
 
 ## Decisions made so far (not yet revisited by the owner)
 
@@ -245,4 +247,4 @@ The owner asked me to research and decide these.
    - Vite hot-reloads while code is being edited. A reload in the middle of a multi-file change can leave the window black ("does not provide an export named …"). Restart the dev app after a batch of edits. It isn't a bug in the app.
    - The database is `%APPDATA%\com.keepitsimpleanalytics.morsetrainer\morse-trainer.db`, with backups in `backups\` next to it.
    - For screenshots, use `pnpm dev:web` with `?demo=<screen id>`.
-5. **Next:** every phase in scope is built. What's left is the owner's QA (open item 1) and pushing plus the first release (open item 3). The updater, code signing and everything in SPEC §15.1 wait until the owner asks for them.
+5. **Next:** every phase in scope is built. The v2.0.0 draft release is built. What's left is the owner's QA on its installer (open item 1), then publishing it (open item 3). The updater, code signing and everything in SPEC §15.1 wait until the owner asks for them.

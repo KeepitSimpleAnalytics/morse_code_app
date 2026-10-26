@@ -82,13 +82,17 @@ jobs:
         run: |
           find_draft() {
             gh api "repos/$GITHUB_REPOSITORY/releases" --paginate \
-              --jq "[.[] | select(.draft and .tag_name == \"$GITHUB_REF_NAME\") | .id] | first // empty"
+              --jq "[.[] | select(.draft and .tag_name == \"$GITHUB_REF_NAME\") | .id] | first // empty" |
+              head -n1 # --jq runs per page, so each page can give one
           }
           id=$(find_draft)
           if [ -z "$id" ]; then
-            gh release create "$GITHUB_REF_NAME" --draft --verify-tag \
-              --title "Morse Trainer $GITHUB_REF_NAME" --notes-file .github/release-notes.md
-            id=$(find_draft)
+            # The id comes from the create call: the release list can lag a new
+            # draft by a few seconds, so searching it again may not find it yet.
+            id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/releases" \
+              -f tag_name="$GITHUB_REF_NAME" -F draft=true \
+              -f name="Morse Trainer $GITHUB_REF_NAME" -F body=@.github/release-notes.md \
+              --jq .id)
           fi
           if [ -z "$id" ]; then
             echo "::error::No draft release found for $GITHUB_REF_NAME (is it already published?)"
